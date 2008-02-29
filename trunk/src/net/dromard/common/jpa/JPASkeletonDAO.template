@@ -1,0 +1,35 @@
+package ${daoImplementationPackage};
+
+import java.util.List;
+
+import net.dromard.movies.model.${modelClassname};
+
+import org.springframework.transaction.annotation.Transactional;
+
+@Transactional
+public class ${daoImplementationClassname} extends GenericDAO implements ${daoInterfaceClassname} {
+
+	public ${modelClassname} findById(int id) {
+		return super.findById(${modelClassname}.class, id);
+	}
+
+	protected Class<${modelClassname}> getEntityClass() {
+		return ${modelClassname}.class;
+	}
+
+	public ${modelClassname} persist(${modelClassname} entity) {
+		if (entity.getId() == null) {
+			return super.create(entity);
+		} else { 
+			return super.update(entity);
+		}
+	}
+
+	public void remove(int id) {
+		super.remove(getEntityClass(), id);
+	}
+
+	public List<${modelClassname}> findAll() {
+		return super.findAll(${modelClassname}.class);
+	}
+}

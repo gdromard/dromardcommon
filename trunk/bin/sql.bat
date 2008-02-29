@@ -1,0 +1,1 @@
+@"C:\Program Files\JavaSoft\JRE\1.3.1\bin\java" -cp ../lib/classes12.zip;../lib/dromard.common-1.4.jar net.dromard.common.jdbc.Sql2Csv sql.properties

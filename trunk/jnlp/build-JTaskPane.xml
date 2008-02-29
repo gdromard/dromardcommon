@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="Compil">
+	<!--+
+		| Initial properties
+		+-->
+	<property name="project.version" value="0.1"/>
+	<property name="project.name" value="JTaskPaneDemo"/>
+	<property name="project.short.name" value="JTaskPaneDemo"/>
+	
+	<property name="bin.dir" value="."/>
+	<property name="home.dir" value=".."/>
+	<property name="src.dir" value="${home.dir}/src"/>
+	<property name="lib.dir" value="${home.dir}/lib"/>
+	<property name="class.dir" value="${home.dir}/classes"/>
+	<property name="doc.dir" value="${home.dir}/doc"/>
+	
+	<property name="zip.name" value="${project.short.name}"/>
+	<property name="jar.name" value="${project.short.name}"/>
+	
+	<property name="project.package" value="com"/>
+	<property name="main.class" value="net.dromard.common.swing.JTaskPane"/>
+	
+	<property name="build.optimize" value="true"/>
+	<property name="build.verbose" value="false"/>
+	<property name="build.debug" value="false"/>
+	
+	<property name="jnlp.dir" value="${home.dir}/jnlp/jnlp"/>
+	<property name="javadoc.dir" value="${jnlp.dir}/javadoc"/>
+	
+	<!--+
+		| Classpath
+		+-->
+	<path id="build.classpath">
+		<fileset dir="${lib.dir}"><include name="*.jar"/></fileset>
+	</path>
+	
+	<path id="lib.path" path="${lib.dir}">
+	</path>
+	
+	<path id="execute.classpath">
+		<fileset dir="${lib.dir}"><include name="*.jar"/></fileset>
+		<fileset dir="${bin.dir}"><include name="*.jar"/></fileset>
+	</path>
+	
+	<property name="manifest.classpath" refid="build.classpath"/>
+	<property name="manifest.lib.path" refid="lib.path"/>
+	
+	<!--+
+		| Clean target
+		+-->
+	<target name="Clean">
+		<delete dir="${class.dir}"/>
+		<delete dir="${javadoc.dir}"/>
+		<delete dir="${src.dir}/META-INF"/>
+		<delete file="${lib.dir}/${jar.name}-${project.version}.jar"/>
+		<delete file="${home.dir}/${zip.name}-${project.version}.jar"/>
+	</target>
+	
+	<!--+
+		| Build target
+		+-->
+	<target name="Build" depends="Clean, MakeJar"></target>
+	
+	<!--+
+		| Build target
+		+-->
+	<target name="MakeJar" depends="Compil">
+		<echo>CLASSPATH: ${manifest.lib.path}</echo>
+		<echo>LIB DIR: ${lib.dir}</echo>
+		
+		<mkdir dir="${lib.dir}"/>
+		<mkdir dir="${class.dir}"/>
+		<mkdir dir="${src.dir}/META-INF"/>
+		<copy todir="${class.dir}">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java"/>
+			</fileset>
+		</copy>
+		<manifest mode="update" file="${src.dir}/META-INF/MANIFEST.MF">
+			<attribute name="Main-Class" value="${main.class}" />
+			<attribute name="Class-Path" value="" />
+		</manifest>
+	
+		<!--+
+			| Creating path 
+			+-->
+		<replace file="${src.dir}/META-INF/MANIFEST.MF" token="Class-Path:" value="Class-Path: ${manifest.classpath}"/>
+		<replace file="${src.dir}/META-INF/MANIFEST.MF" token="${manifest.lib.path}" value="${lib.dir}" />
+		<replace file="${src.dir}/META-INF/MANIFEST.MF" token="\" value="/" />
+		<replace file="${src.dir}/META-INF/MANIFEST.MF" token=";" value=" " />
+
+	    <jar basedir="${class.dir}" jarfile="${bin.dir}/${jar.name}-${project.version}.jar" manifest="${src.dir}/META-INF/MANIFEST.MF" />
+		<signjar alias="Pingus.key" jar="${bin.dir}/${jar.name}-${project.version}.jar" keystore="jnlp/Pingus.cert" storepass="KeystorePassword" />
+
+    </target>
+	
+	<!--+
+		| Compilation target
+		+-->
+	<target name="Compil">
+		<fixcrlf includes="${src.dir}/${project.package}/**/*.java" 	srcdir="${src.dir}" tab="add" tablength="4"/>
+		<fixcrlf includes="${src.dir}/${project.package}/*.java" 		srcdir="${src.dir}" tab="add" tablength="4"/>
+		<fixcrlf includes="${main.class}.java" 							srcdir="${src.dir}" tab="add" tablength="4"/>
+		<mkdir dir="${class.dir}"/>
+		<javac debug="${build.debug}" destdir="${class.dir}" listfiles="true" optimize="${build.optimize}" srcdir="${src.dir}" verbose="${build.verbose}">
+			<classpath refid="build.classpath"/>
+			<include name="${project.package}/**/*.java"/>
+			<include name="${project.package}/*.java"/>
+			<include name="${main.class}.java"/>
+		</javac>
+    </target>
+	
+	<!--+
+		| JavaDoc target
+		+-->
+	<target name="JavaDoc">
+		<mkdir dir="${javadoc.dir}"/>
+		<javadoc access="protected" author="true" destdir="${javadoc.dir}" use="true" version="true" windowtitle="${project.name} API">
+			<classpath refid="build.classpath"/>
+			<fileset defaultexcludes="yes" dir="${src.dir}">
+				<include name="${project.package}/**/*.java"/>
+				<include name="${project.package}/*.java"/>
+				<include name="${main.class}/*.java"/>
+			</fileset>
+			<header><![CDATA[<h3>${project.name} API v${project.version}</h3>]]></header>
+<!--			<bottom><![CDATA[<i>Copyright &#169; 2004 Airbus Corp. All Rights Reserved.</i>]]></bottom>
+-->			<tag description="To do:" name="todo" scope="all"/>
+		</javadoc>
+	</target>
+	
+	<!--+
+		| Execution target
+		+-->
+	<target name="Execute" depends="Compil">
+		<java classname="${main.class}">
+		<classpath refid="execute.classpath"/>
+		</java>
+	</target>
+	
+	<!--+
+		| Make Zip target
+		| This target make a snapshot of your project into a zip file
+		+-->
+    <target name="MakeZip" depends="MakeJar">
+        <!-- Putting lib content -->
+        <zip destfile="${home.dir}/${zip.name}-${project.version}.zip">
+            <zipfileset dir="${home.dir}" includes="*.*" exludes="${zip.name}-*.zip" prefix="${zip.name}-${project.version}/"/>
+        </zip>
+    </target>
+	
+	<!--+
+		| Publish on Web Server
+		|   + Java Web Start
+		+-->
+	<target name="publish" depends="jnlp">
+		<!-- Structure creation -->
+		<mkdir dir="${jnlp.dir}"/>
+		<mkdir dir="${jnlp.dir}/doc"/>
+		<mkdir dir="${jnlp.dir}/lib"/>
+		<!-- Resources -->
+		<copy todir="${jnlp.dir}/lib" overwrite="true"><fileset dir="${lib.dir}" includes="*.jar"/></copy>
+		<copy todir="${jnlp.dir}/" overwrite="true"><fileset dir="${bin.dir}" includes="${jar.name}-${project.version}.jar"/></copy>
+		<copy todir="${jnlp.dir}/" overwrite="true"><fileset dir="${bin.dir}/jnlp" includes="index.*"/></copy>
+	</target>
+	
+	<!--+
+		| JNLP
+		| Java Web Start
+		+-->
+	<taskdef name="jnlp" classname="net.dromard.common.ant.JNLPTask" classpath="${home.dir}/classes" />
+	
+	<target name="jnlp" depends="MakeJar">
+		<!-- JNLP for JVM 1.4.x -->
+		<mkdir dir="${jnlp.dir}"/>
+		<jnlp spec="1.0+" 
+			version="0.3" 
+			description="JTaskPaneDemo"
+			codebase="http://pingus.homelinux.net/JDemo/JTaskPaneDemo" 
+			href="JTaskPaneDemo.jnlp" 
+			tofile="${jnlp.dir}/JTaskPaneDemo.jnlp">
+			<information>
+				<title>JTaskPaneDemo</title>
+			    <vendor>Pingus</vendor> 
+			    <homepage href="http://pingus.homelinux.net/JDemo/JTaskPaneDemo"/>
+			    <description>JTaskPaneDemo</description>
+			    <description kind="short">JTaskPaneDemo.</description>
+				<offline_allowed/>
+			</information>
+			<security>
+			   	<all_permissions/>
+			</security>
+			<resources>
+				<j2se version="1.4+"/>
+				<jar href="${jar.name}-${project.version}.jar"/>
+			</resources>
+			<application_desc main_class="${main.class}" />
+		</jnlp>
+	</target>
+</project>

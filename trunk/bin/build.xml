@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="Build" name="Dromard Common" basedir="..">
+	
+	<!--+
+		| Initial properties
+		+-->
+	<property name="project.version" value="1.9"/>
+	<property name="project.name" value="Dromard Common Java Library"/>
+	<property name="project.shortname" value="dromard.common"/>
+	
+	<property name="home.dir" value="${basedir}"/>
+	<property name="bin.dir" value="${home.dir}/bin"/>
+	<property name="src.dir" value="${home.dir}/src"/>
+	<property name="lib.dir" value="${home.dir}/lib"/>
+	<property name="lib-dist.dir" value="${lib.dir}"/>
+	<property name="class.dir" value="${home.dir}/classes"/>
+	<property name="javadoc.dir" value="${home.dir}/javadoc/${project.shortname}"/>
+	
+	<property name="zip.name" value="${project.shortname}"/>
+	<property name="jar.name" value="${project.shortname}"/>
+	
+	<property name="project.package" value="net/dromard"/>
+	<property name="main.class" value="${project.package}/common/framework/modules/csveditor/CSVEditorModule"/>
+	
+	<property name="build.optimize" value="true"/>
+	<property name="build.verbose" value="false"/>
+	<property name="build.debug" value="false"/>
+
+	
+	<!--+
+		| ear-application
+		| EAR application.xml generation task
+		+-->
+	<taskdef name="earApplication" classname="net.dromard.common.ant.EarApplicationTask" classpath="${class.dir}" />
+	
+	<!--+
+		| Classpath
+		+-->
+	<path id="build.classpath">
+		<fileset dir="${lib.dir}"><include name="*.jar"/></fileset>
+	</path>
+	
+	<path id="execute.classpath">
+		<pathelement location="${lib.dir}/${jar.name}-${project.version}.jar"/>
+	</path>
+
+	<!--+
+		| Emma Path
+		+-->
+	<path id="test.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar"/>
+			<exclude name="*${jar.name}*"/>
+		</fileset>
+		<fileset dir="${emma.dir}"><include name="*.jar"/></fileset>
+		<pathelement path="${tests.dir}/classes"/>
+	</path>	
+	
+	<!--+
+		| Clean target
+		+-->
+	<target name="Clean">
+		<delete dir="${class.dir}"/>
+		<delete dir="${javadoc.dir}"/>
+		<delete dir="${src.dir}/META-INF"/>
+		<delete file="${lib.dir}/${jar.name}-${project.version}.jar"/>
+		<delete file="${home.dir}/${zip.name}-${project.version}.jar"/>
+	</target>
+	
+	<!--+
+		| Build target
+		+-->
+	<target name="Build" depends="Clean, MakeJar"></target>
+	
+	<!--+
+		| Build target
+		+-->
+	<target name="MakeJar" depends="Compil">
+		<mkdir dir="${lib.dir}"/>
+		<mkdir dir="${src.dir}/META-INF"/>
+		<manifest mode="replace" file="${src.dir}/META-INF/${project.shortname}.MF"><attribute name="Main-Class" value="${main.class}"/></manifest>
+	    <jar basedir="${class.dir}" jarfile="${lib.dir}/${jar.name}-${project.version}.jar" manifest="${src.dir}/META-INF/${project.shortname}.MF"/>
+    </target>
+	
+	<!--+
+		| Compilation target
+		+-->
+	<target name="Compil">
+		<fixcrlf includes="${src.dir}/${project.package}/**/*.java" 	srcdir="${src.dir}" tab="add" tablength="4"/>
+		<fixcrlf includes="${src.dir}/${project.package}/*.java" 			srcdir="${src.dir}" tab="add" tablength="4"/>
+		<fixcrlf includes="${main.class}.java" 										srcdir="${src.dir}" tab="add" tablength="4"/>
+		<mkdir dir="${class.dir}"/>
+		<javac debug="${build.debug}" destdir="${class.dir}" listfiles="true" optimize="${build.optimize}" srcdir="${src.dir}" verbose="${build.verbose}">
+			<classpath refid="build.classpath"/>
+			<include name="${project.package}/**/*.java"/>
+			<include name="${project.package}/*.java"/>
+			<include name="${main.class}.java"/>
+		</javac>
+		<copy todir="${class.dir}">
+			<fileset dir="${src.dir}">
+				<exclude name="**/*.java"/>
+				<exclude name="**/*.class"/>
+			</fileset>
+		</copy>
+    </target>
+	
+	<!--+
+		| JavaDoc target
+		+-->
+	<target name="JavaDoc">
+		<mkdir dir="${javadoc.dir}"/>
+		<javadoc access="protected" author="true" destdir="${javadoc.dir}" use="true" version="true" windowtitle="${project.name} API">
+			<classpath refid="build.classpath"/>
+			<fileset defaultexcludes="yes" dir="${src.dir}">
+				<include name="${project.package}/**/*.java"/>
+				<include name="${project.package}/*.java"/>
+				<include name="${main.class}/*.java"/>
+			</fileset>
+			<header><![CDATA[<h3>${project.name} API v${project.version}</h3>]]></header>
+			<bottom><![CDATA[<i>Copyright &#169; 2004 Airbus Corp. All Rights Reserved.</i>]]></bottom>
+			<tag description="To do:" name="todo" scope="all"/>
+		</javadoc>
+	</target>
+	
+	<!--+
+		| Execution target
+		+-->
+	<target name="Execute" depends="Compil">
+		<java classname="${main.class}">
+		<classpath refid="execute.classpath"/>
+		</java>
+	</target>
+	
+    <target depends="MakeJar" name="MakeZip">
+		<copy todir="${lib.dir}"><fileset dir="${bin.dir}"><include name="README.txt"/></fileset></copy>
+        <!-- Putting lib content -->
+        <zip destfile="${home.dir}/${zip.name}-${project.version}.zip">
+            <zipfileset dir="${lib.dir}" includes="*.*" prefix="${zip.name}-${project.version}/"/>
+        </zip>
+    </target>
+
+	<!--+
+		| Create the Ear File 
+		+-->
+	<target name="makeEar">
+		<mkdir dir="temp"/>
+		<earApplication toFile="temp/application.xml">
+			<displayName displayName="${project.name}"/>
+			<module>
+				<web>
+					<webUri webUri="${project.shortname}-${project.version}.war"/>
+					<contextRoot contextRoot="/${project.shortname}"/>
+				</web>
+			</module>
+		</earApplication>
+		<!-- Create ear file -->
+		<ear destfile="${lib-dist.dir}/${project.shortname}-${project.version}.ear" appxml="temp/application.xml">
+			<fileset dir="${lib-dist.dir}" defaultexcludes="true">
+				<include name="${project.shortname}-${project.version}.war"/>
+			</fileset>
+		</ear>
+		<delete dir="temp" />
+	</target>
+</project>

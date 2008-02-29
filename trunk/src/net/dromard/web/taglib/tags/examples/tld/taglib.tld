@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib
+  PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+  "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+<taglib>
+	<tlib-version>1.0</tlib-version>
+	<jsp-version>1.2</jsp-version>
+	<short-name>cimpa</short-name>
+	<uri></uri>
+	<display-name>TagLib Example</display-name>
+	<description></description>
+
+	<!--+
+		| Head tag declaration
+		+-->
+	<tag>
+		<name>head</name>
+		<tag-class>net.dromard.web.taglib.tags.HeadTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>Page templating.</description>
+		
+		<attribute>
+			<name>title</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	
+	<!--+
+		| Body tag declaration
+		+-->
+	<tag>
+		<name>body</name>
+		<tag-class>net.dromard.web.taglib.tags.BodyTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>Page templating.</description>
+		
+		<!-- Used for the date format -->
+		<attribute>
+			<name>lang</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>menu</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>cssClass</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>logoHref</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>headerContent</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>footer</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	
+	
+	<!--+
+		| Tab tags declaration
+		+-->
+	<tag>
+		<name>tabcontainer</name>
+		<tag-class>net.dromard.web.taglib.tags.TabContainerTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>Tab templating.</description>
+	</tag>
+	<tag>
+		<name>tabcontent</name>
+		<tag-class>net.dromard.web.taglib.tags.TabContentTag</tag-class>
+		<body-content>JSP</body-content>
+		<description>Tab templating.</description>
+		<attribute>
+			<name>tabId</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>tabName</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>function</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>selected</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+</taglib>

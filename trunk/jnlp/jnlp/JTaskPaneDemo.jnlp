@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<jnlp spec="1.0+" version="0.3" codebase="http://pingus.homelinux.net/JDemo/JTaskPaneDemo" href="JTaskPaneDemo.jnlp">
+	<information>
+		<title>JTaskPaneDemo</title>
+		<vendor>Pingus</vendor>
+		<homepage href="http://pingus.homelinux.net/JDemo/JTaskPaneDemo"/>
+		<description>JTaskPaneDemo</description>
+		<description kind="short">JTaskPaneDemo.</description>
+		<offline-allowed/>
+	</information>
+	<security>
+		<all-permissions/>
+	</security>
+	<resources>
+		<j2se version="1.4+"/>
+		<jar href="JTaskPaneDemo-0.1.jar"/>
+	</resources>
+	<application-desc main-class="net.dromard.common.swing.JTaskPane"/>
+</jnlp>
