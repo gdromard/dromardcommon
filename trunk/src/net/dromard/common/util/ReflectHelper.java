@@ -3,10 +3,15 @@
  */
 package net.dromard.common.util;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utility class for reflect purpose.
@@ -21,7 +26,7 @@ import java.lang.reflect.Method;
  *    - add method that provide accessor method facilities.
  *
  * [02/10/2006] by Gabriel Dromard
- *    - Renamed from net.dromard.common.util.system.ClassUtil to net.dromard.common.util.ReflectUtil.
+ *    - Renamed from ClassUtil to ReflectUtil.
  *    - Add comments.
  *
  * [12/10/2005] by Gabriel Dromard
@@ -49,26 +54,32 @@ public final class ReflectHelper {
     /** Constant meaning accessor type getter for boolean. */
     public static final String BOOLEAN_GETTER = "is";
 
+    /** Cache getters. Method object hashed by fieldName hashed by class object. */
+    public static final Map GETTER_CACHE = new SoftHashtable();
+
+    /** Cache methods. Method object hashed by fieldName hashed by class object. */
+    public static final Map METHODS_CACHE = new SoftHashtable();
+
     /**
      * Instantiate a Class using its name.
      * @param className The class name.
      * @param arguments The arguments to be passed to constructor.
      * @param types The types of arguments.
      * @return The instance
-     * @throws ClassNotFoundException Thrown if you try to instanciate a class that does not exist.
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws ClassNotFoundException Thrown if you try to instantiate a class that does not exist.
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      * @throws InstantiationException Any other case
      */
     public static Object newInstance(final String className, final Object[] arguments, final Class[] types) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
         // Retrieve class to be load
         Class clazz = Class.forName(className);
 
-        // Récupération du constructeur correspondant à la liste des parametres donnée
+        // Retrieving corresponding constructor
         Constructor constructor = clazz.getConstructor(types);
 
-        // Création d'une instance avec le constructeur récupérés
+        // Create an instance
         return constructor.newInstance(arguments);
     }
 
@@ -77,10 +88,10 @@ public final class ReflectHelper {
      * @param className The class name.
      * @param arguments The parameters to be passed to constructor.
      * @return The instance
-     * @throws ClassNotFoundException Thrown if you try to instanciate a class that does not exist.
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws ClassNotFoundException Thrown if you try to instantiate a class that does not exist.
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      * @throws InstantiationException Any other case
      */
     public static Object newInstance(final String className, final Object[] arguments) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
@@ -97,11 +108,11 @@ public final class ReflectHelper {
      * Instantiate a Class using its name.
      * @param className The class name
      * @return The instance
-     * @throws ClassNotFoundException Thrown if you try to instanciate a class that does not exist.
+     * @throws ClassNotFoundException Thrown if you try to instantiate a class that does not exist.
      * @throws InstantiationException Any other case
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object newInstance(final String className) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
         return newInstance(className, new Object[] {});
@@ -114,14 +125,20 @@ public final class ReflectHelper {
      * @param arguments  The arguments to pass to the methods.
      * @param types      The types of arguments.
      * @return the result of the invoked method.
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object invokeMethod(final Object object, final String methodName, final Object[] arguments, final Class[] types) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         try {
-            // If simple getter is not found ... try boolean one
-            return getMethod(object.getClass(), methodName, types).invoke(object, arguments);
+            Class beanClass = object.getClass();
+            Map methods = getCachedMethods(beanClass);
+            Method getter = (Method) methods.get(methodName);
+            if (getter == null) {
+                getter = getMethod(beanClass, methodName, types);
+                methods.put(methodName, getter);
+            }
+            return getter.invoke(object, arguments);
         } catch (NoSuchMethodException ex) {
             NoSuchMethodException thrown = new NoSuchMethodException(formatInvokeGetterException(ex, object, methodName, arguments));
             thrown.setStackTrace(ex.getStackTrace());
@@ -137,17 +154,36 @@ public final class ReflectHelper {
 
     /**
      * Invoke a methods (<code>methodName</code>) from an <code>object</code> with <code>arguments</code> of <code>types</code>.
-     * @param clazz      The <code>clazz</code> on which to retreive the method.
+     * @param object     The object from which you want to invoke a methods.
+     * @param method     The method to invoke.
+     * @param arguments  The arguments to pass to the methods.
+     * @return the result of the invoked method.
+     * @throws InvocationTargetException Can occure during invocation
+     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     */
+    public static Object invokeMethod(final Object object, final Method method, final Object[] arguments) throws IllegalAccessException, InvocationTargetException {
+        return method.invoke(object, arguments);
+    }
+
+    /**
+     * Invoke a methods (<code>methodName</code>) from an <code>object</code> with <code>arguments</code> of <code>types</code>.
+     * @param clazz      The <code>clazz</code> on which to retrieve the method.
      * @param methodName The method name to invoke.
      * @param arguments  The arguments to pass to the methods.
      * @param types      The types of arguments.
      * @return the result of the invoked method.
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object invokeStaticMethod(final Class clazz, final String methodName, final Object[] arguments, final Class[] types) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        return getMethod(clazz, methodName, types).invoke(null, arguments);
+        Map methods = getCachedMethods(clazz);
+        Method getter = (Method) methods.get(methodName);
+        if (getter == null) {
+            getter = getMethod(clazz, methodName, types);
+            methods.put(methodName, getter);
+        }
+        return getter.invoke(null, arguments);
     }
 
     /**
@@ -156,9 +192,9 @@ public final class ReflectHelper {
      * @param methodName The method name to invoke.
      * @param arguments The arguments to pass to the methods.
      * @return the result of the invoked method.
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object invokeMethod(final Object object, final String methodName, final Object[] arguments) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         // Construct the types array
@@ -176,9 +212,9 @@ public final class ReflectHelper {
      * @param fieldName the field name.
      * @param valueToSet the value to set.
      * @param valueToSetType the type of the value to set.
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static void invokeSetter(final Object toFill, final String fieldName, final Object valueToSet, final Class valueToSetType) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         invokeMethod(toFill, computeAccessorMethodName(SETTER, fieldName), new Object[] {valueToSet}, new Class[] {valueToSetType});
@@ -190,36 +226,120 @@ public final class ReflectHelper {
      * @param bean the JavaBean object.
      * @param fieldName the field name.
      * @return The value returned by the getter.
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object invokeGetter(final Object bean, final String fieldName) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        String field = fieldName;
+        // Retrieve
+        Class beanClass = bean.getClass();
+        Map getters = getCachedGetters(beanClass);
+        Method getter = (Method) getters.get(fieldName);
+        if (getter == null) {
+            try {
+                getter = getMethod(beanClass, computeAccessorMethodName(GETTER, fieldName), new Class[] {});
+            } catch (NoSuchMethodException ex) {
+                try {
+                    getter = getMethod(beanClass, computeAccessorMethodName(BOOLEAN_GETTER, fieldName), new Class[] {});
+                } catch (NoSuchMethodException exOnBoolean) {
+                    // if throws NoSuchmethodException again, let the original one bubble up.
+                    throw ex;
+                }
+            }
+            getters.put(fieldName, getter);
+        }
+        // Invoke
+        return invokeMethod(bean, getter, new Object[] {});
+    }
+
+    /**
+     * Retrieve the cached methods of a class.
+     * @param clazz The class
+     * @return the cached methods of a class.
+     */
+    private static Map getCachedGetters(final Class clazz) {
+        Map getters = (Map) GETTER_CACHE.get(clazz);
+        if (getters == null) {
+            getters = new SoftHashtable();
+            GETTER_CACHE.put(clazz, getters);
+        }
+        return getters;
+    }
+
+    /**
+     * Retrieve the cached methods of a class.
+     * @param clazz The class
+     * @return the cached methods of a class.
+     */
+    private static Map getCachedMethods(final Class clazz) {
+        Map methods = (Map) METHODS_CACHE.get(clazz);
+        if (methods == null) {
+            methods = new SoftHashtable();
+            METHODS_CACHE.put(clazz, methods);
+        }
+        return methods;
+    }
+
+    /**
+     * This method handle the return of getters using their corresponding fieldname, or the return of a method.
+     * @param bean the JavaBean object.
+     * @param reflect the field name.
+     * @return The value returned by the getter or the method.
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
+     */
+    public static Object invoke(final Object bean, final String reflect) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        String field = reflect;
         Object instance = bean;
+        while (field.indexOf('[') > -1 || field.indexOf('.') > -1 || field.indexOf('(') > 0) {
+            if (field.indexOf('[') > -1 && (field.indexOf('.') == -1 || field.indexOf('.') > field.indexOf('[')) && (field.indexOf('(') == -1 || field.indexOf('(') > field.indexOf('['))) {
+                if (field.indexOf('[') > 0) {
+                    // Invoke getter to retrieve the child element
+                    instance = invokeGetter(instance, field.substring(0, field.indexOf('[')));
+                    // If result is null no need to continue
+                    if (instance == null) {
+                        return null;
+                    }
+                }
+                // Re route field name to retrieve the field of the child instance
+                int index = Integer.parseInt(field.substring(field.indexOf('[') + 1, field.indexOf(']')));
+                if (instance instanceof List) {
+                    instance = ((List) instance).get(index);
+                } else {
+                    instance = Array.get(instance, index);
+                }
+                field = field.substring(field.indexOf(']') + 1);
+            } else if (field.indexOf('.') > -1 && (field.indexOf('(') == -1 || field.indexOf('(') > field.indexOf('.'))) {
         // In the case that you want to retrieve in one time the field of a child object
-        while (field.indexOf('.') > 0) {
-            // Invoke getter to retreive the child element
+                if (field.indexOf('.') > 0) {
+                    // Invoke getter to retrieve the child element
             instance = invokeGetter(instance, field.substring(0, field.indexOf('.')));
             // If result is null no need to continue
             if (instance == null) {
                 return null;
             }
-            // Re rout field name to retreive the field of the child instance
+                }
+                // Re route field name to retrieve the field of the child instance
             field = field.substring(field.indexOf('.') + 1);
+            } else if (field.indexOf('(') > 0) {
+                // Invoke getter to retrieve the child element
+                instance = invokeMethod(instance, field.substring(0, field.indexOf('(')), new Object[] {});
+                // If result is null no need to continue
+                if (instance == null) {
+                    return null;
         }
-        try {
-            return invokeMethod(instance, computeAccessorMethodName(GETTER, field), new Object[] {});
-        } catch (NoSuchMethodException noSuchMethod) {
-            String accessor = computeAccessorMethodName(BOOLEAN_GETTER, field);
-            try {
-                // If simple getter is not found ... try boolean one
-                return invokeMethod(instance, accessor, new Object[] {});
-            } catch (NoSuchMethodException ex) {
-                // If it's still not found or return an error ... than throw the original error.
-                throw noSuchMethod;
+                // Re route field name to retrieve the field of the child instance
+                field = field.substring(field.indexOf(')') + 1);
             }
         }
+        if (field.length() == 0) {
+            return instance;
+            }
+        if (field.indexOf('.') > -1 || field.indexOf('[') > -1) {
+            return invoke(instance, field);
+        }
+        return invokeGetter(instance, field);
     }
 
     /**
@@ -252,12 +372,12 @@ public final class ReflectHelper {
 
     /**
      * Get the field (<code>filedName</code>) value of an <code>object</code>.
-     * @param object The <code>object</code> on which to retreive the field value.
-     * @param fieldName The <code>fieldName</code> to retreive.
+     * @param object The <code>object</code> on which to retrieve the field value.
+     * @param fieldName The <code>fieldName</code> to retrieve.
      * @return The value of the field.
-     * @throws NoSuchFieldException Thrown if you try to retreive a field that does not exist.
-     * @throws InvocationTargetException Can occure during invocation
-     * @throws IllegalAccessException Thrown while trying to access illagaly the instance
+     * @throws NoSuchFieldException Thrown if you try to retrieve a field that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object getFieldValue(final Object object, final String fieldName) throws NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         try {
@@ -272,11 +392,27 @@ public final class ReflectHelper {
     }
 
     /**
+     * Set the field (<code>filedName</code>) value of an <code>object</code>.
+     * @param object The <code>object</code> on which to set the field value.
+     * @param fieldName The <code>fieldName</code> to set.
+     * @param fieldValue The <code>fieldValue</code> to set.
+     * @throws NoSuchFieldException Thrown if you try to retrieve a field that does not exist.
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
+     */
+    public static void setFieldValue(final Object object, final String fieldName, final Object fieldValue) throws NoSuchFieldException, IllegalAccessException {
+        try {
+            getField(object.getClass(), fieldName).set(object, fieldValue);
+        } catch (NoSuchFieldException ex) {
+            throw ex;
+        }
+    }
+
+    /**
      * Get the field (<code>filedName</code>) of a class (<code>clazz</code>).
-     * @param clazz The <code>clazz</code> on which to retreive the field.
-     * @param fieldName The <code>fieldName</code> to retreive.
+     * @param clazz The <code>clazz</code> on which to retrieve the field.
+     * @param fieldName The <code>fieldName</code> to retrieve.
      * @return The Field object of the given class.
-     * @throws NoSuchFieldException Thrown if you try to retreive a field that does not exist.
+     * @throws NoSuchFieldException Thrown if you try to retrieve a field that does not exist.
      */
     public static Field getField(final Class clazz, final String fieldName) throws NoSuchFieldException {
         try {
@@ -295,12 +431,116 @@ public final class ReflectHelper {
     }
 
     /**
-     * Retreive the method (<code>methodName</code>) of a class (<code>clazz</code>) using parameters <code>types</code>.
-     * @param clazz The <code>clazz</code> on which to retreive the method.
-     * @param methodName The method name to retreive.
+     * Return all declared fields of a class (and all its super class).
+     * @see {@link Class#getDeclaredFields()}
+     * @param clazz The class on which to retrieve the fields.
+     * @return All the fields.
+     */
+    public static List getDeclaredFields(final Class clazz) {
+        List fields = new ArrayList();
+        Class current = clazz;
+        while (!current.getName().equals(Object.class.getName())) {
+            fields.addAll(Arrays.asList(current.getDeclaredFields()));
+            current = current.getSuperclass();
+        }
+        return fields;
+    }
+
+    /**
+     * Return all getter of a class (but not the ones from parent).
+     * @param clazz The class on which to retrieve the getters.
+     * @return All the methods.
+     */
+    public static List getGetters(final Class clazz) {
+        List getters = new ArrayList();
+        if (clazz != null) {
+            Method[] methods = clazz.getMethods();
+            for (int i = 0; i < methods.length; i++) {
+                if (methods[i].getDeclaringClass().equals(clazz)) {
+                    if ((methods[i].getName().startsWith(GETTER) || methods[i].getName().startsWith(BOOLEAN_GETTER)) && methods[i].getParameterTypes().length == 0) {
+                        getters.add(methods[i]);
+                    }
+                }
+            }
+        }
+        return getters;
+    }
+
+    /**
+     * Return all getter of a class (even parent's ones).
+     * @param clazz The class on which to retrieve the getters.
+     * @return All the methods.
+     */
+    public static List getGettersRecursivly(final Class clazz) {
+        List getters = new ArrayList();
+        if (clazz != null) {
+            Class current = clazz;
+            while (!current.getName().equals(Object.class.getName())) {
+                Method[] methods = current.getMethods();
+                for (int i = 0; i < methods.length; i++) {
+                    if (methods[i].getDeclaringClass().equals(current)) {
+                        if ((methods[i].getName().startsWith(GETTER) || methods[i].getName().startsWith(BOOLEAN_GETTER)) && methods[i].getParameterTypes().length == 0) {
+                            getters.add(methods[i]);
+                        }
+                    }
+                }
+                current = current.getSuperclass();
+            }
+        }
+        return getters;
+    }
+
+    /**
+     * Return all getter of a class (but not the ones from parent).
+     * @param clazz The class on which to retrieve the getters.
+     * @return All the methods.
+     */
+    public static List getSetters(final Class clazz) {
+        List getters = new ArrayList();
+        if (clazz != null) {
+            Method[] methods = clazz.getMethods();
+            for (int i = 0; i < methods.length; i++) {
+                if (methods[i].getDeclaringClass().equals(clazz)) {
+                    if (methods[i].getName().startsWith(SETTER) && methods[i].getName().length() > SETTER.length() && methods[i].getParameterTypes().length == 1) {
+                        getters.add(methods[i]);
+                    }
+                }
+            }
+        }
+        return getters;
+    }
+
+    /**
+     * Return all getter of a class (even parent's ones).
+     * @param clazz The class on which to retrieve the getters.
+     * @return All the methods.
+     */
+    public static List getSettersRecursivly(final Class clazz) {
+        List getters = new ArrayList();
+        if (clazz != null) {
+            Class current = clazz;
+            while (!current.getName().equals(Object.class.getName())) {
+                Method[] methods = current.getMethods();
+                for (int i = 0; i < methods.length; i++) {
+                    if (methods[i].getDeclaringClass().equals(current)) {
+                        if (methods[i].getName().startsWith(SETTER) && methods[i].getName().length() > SETTER.length() && methods[i].getParameterTypes().length == 1) {
+                            getters.add(methods[i]);
+                        }
+                    }
+                }
+                current = current.getSuperclass();
+            }
+        }
+        return getters;
+    }
+
+    /**
+     * retrieve the method (<code>methodName</code>) of a class (<code>clazz</code>) using parameters <code>types</code>.
+     * @param clazz The <code>clazz</code> on which to retrieve the method.
+     * @param methodName The method name to retrieve.
      * @param types The types of the method's arguments.
-     * @return A Method objec.
-     * @throws NoSuchMethodException Thrown if you try to retreive a method that does not exist.
+     * @return A Method object.
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
      */
     public static Method getMethod(final Class clazz, final String methodName, final Class[] types) throws NoSuchMethodException {
         try {
@@ -327,12 +567,36 @@ public final class ReflectHelper {
      * @throw IllegalArgumentException If the arguments type is not valid.
      */
     private static String computeAccessorMethodName(final String accessorType, final String fieldName) {
-        if (!accessorType.equals(SETTER) && !accessorType.equals(GETTER) && !accessorType.equals(BOOLEAN_GETTER)) {
+        if (!GETTER.equals(accessorType) && !SETTER.equals(accessorType) && !BOOLEAN_GETTER.equals(accessorType)) {
             throw new IllegalArgumentException("Accessor Type : " + accessorType + " isn't correct");
         }
-        if (null == fieldName || "".equals(fieldName)) {
+        if (StringHelper.isEmpty(fieldName)) {
             throw new IllegalArgumentException("fieldName migth not be null or empty");
         }
-        return accessorType + fieldName.replaceFirst("" + fieldName.charAt(0), ("" + fieldName.charAt(0)).toUpperCase());
+        return accessorType + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+    }
+
+    /**
+     * If you want to map a getter/setter with its field name.
+     * Use this method to convert getter or setter into fieldname
+     * @param method The method to be converted
+     * @return The field name or method name if the method is neither a getter neither a setter
+     */
+    public static String getFieldName(final Method method) {
+        String prefix = null;
+        if (method.getName().startsWith(GETTER)) {
+            prefix = GETTER;
+        } else if (method.getName().startsWith(SETTER)) {
+            prefix = SETTER;
+        } else if (method.getName().startsWith(BOOLEAN_GETTER)) {
+            prefix = BOOLEAN_GETTER;
+        } else {
+            return method.getName();
+        }
+        if (method.getName().length() == prefix.length()) {
+            return method.getName();
+        }
+
+        return ("" + method.getName().charAt(prefix.length())).toLowerCase() + method.getName().substring(prefix.length() + 1);
     }
 }

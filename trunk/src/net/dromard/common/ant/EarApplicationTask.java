@@ -12,7 +12,7 @@ import org.apache.tools.ant.Project;
  * This class represent an ear application.xml file.
  * It makes ant capable to generate an application.xml file
  * <br>
- * @author    Pingus
+ * @author Gabriel Dromard
  */
 public class EarApplicationTask extends XmlAntTask {
     // ----------------------------------------------

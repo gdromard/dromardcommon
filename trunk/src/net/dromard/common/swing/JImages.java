@@ -90,8 +90,8 @@ public class JImages extends JPanel implements Runnable {
     }
     
     public static void main(String[] args) {
-        //SwingHelper.openInFrame(new JImages(new File("C:/Documents and Settings/Pingus/Desktop/Icons")));
-    	SwingHelper.openInFrame(new JImages(new File("/Users/pingus/Pictures/Wallpapers")));
-        //SwingHelper.openInFrame(new JImages(new File("C:/Home/Pingus/My Pictures")));
+        //SwingHelper.openInFrame(new JImages(new File("C:/Documents and Settings/me/Desktop/Icons")));
+    	//SwingHelper.openInFrame(new JImages(new File("/Users/me/Pictures/Wallpapers")));
+        //SwingHelper.openInFrame(new JImages(new File("C:/Home/me/My Pictures")));
     }
 }

@@ -11,7 +11,7 @@ import net.dromard.common.util.StringHelper;
 /**
  * Tag lib helper class.
  * <br>
- * @author          Pingus
+ * @author Gabriel Dromard
  */
 public final class ReflectTemplateTransformer {
     /**
@@ -25,10 +25,15 @@ public final class ReflectTemplateTransformer {
      * <p>Code Example</p>
      * <pre>
      *       String query = "INSERT INTO table SET name = ${test}, other_table_id = ${id}";
-     *       HashMap params = new HashMap();
-     *       params.put("id", new Integer(15));
-     *       params.put("test", "TEST");
-     *       query = transformQuery(query, params);
+     *       Object obj = new Object() {
+     *          public String getTest() {
+     *              return "test";
+     *          }
+     *          public String getId() {
+     *              return "id";
+     *          }
+     *       }
+     *       query = transformUsingReflection(query, obj, new Formatter() { public String format(final Object object) { return object.toString(); }});
      * </pre>
      * @param string    The string to be transformed
      * @param bean      The JavaBean object used to retreive (by reflection) the fields values
@@ -40,11 +45,15 @@ public final class ReflectTemplateTransformer {
         String result = string;
         String[] splitted = StringHelper.split(result, "$(");
         for (int i = 1; i < splitted.length; i++) {
-            String field = StringHelper.subStringBefore(splitted[i], ")");
-            Object objValue = ReflectHelper.invokeGetter(bean, field);
+            String field = StringHelper.subStringBefore(splitted[i], ")", true);
+            Object objValue = ReflectHelper.invoke(bean, field);
             String value = "";
             if (objValue != null) {
+                if (formatter != null) {
                 value = formatter.format(objValue);
+                } else {
+                    value = objValue.toString();
+                }
             }
             result = StringHelper.replaceAll(result, "$(" + field + ")", value);
         }

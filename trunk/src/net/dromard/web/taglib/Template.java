@@ -13,7 +13,7 @@ import net.dromard.common.templating.GString;
 /**
  * Template definition class.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public class Template {
     /** The template name. */

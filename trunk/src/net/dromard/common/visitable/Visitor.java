@@ -2,7 +2,7 @@ package net.dromard.common.visitable;
 /**
  * Visitor pattern interface.
  * <br>
- * @author          Pingus
+ * @author Gabriel Dromard
  */
 public interface Visitor {
     /**

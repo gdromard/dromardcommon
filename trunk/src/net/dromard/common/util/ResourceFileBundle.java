@@ -1,15 +1,5 @@
 /*
- * File Name    : ResourceFileBundle.java
  * Creation Date: 19/03/2004
- *    
- *   +---------+
- *   | History |
- *   +---------+
- * 
- * 27/07/2004 : 
- *  - Add methods getInputStream()
- *  - Remove methods load(File) & laod(URL)
- *  - Change reload() to apply precedent changes 
  */
 package net.dromard.common.util;
 

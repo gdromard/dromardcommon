@@ -600,8 +600,8 @@ public class PSDReader {
 	static class PSDReaderTest {
 		public static void main(String[] args) {
 			PSDReader r = new PSDReader();
-			//r.read("C:/Home/Pingus/My Icons/Eclipse/Eclipse.psd");
-			r.read("C:/Home/Pingus/My Icons/AbeilleFormDesigner/abeille.psd");
+			//r.read("C:/Home/me/My Icons/Eclipse/Eclipse.psd");
+			r.read("C:/Home/me/My Icons/AbeilleFormDesigner/abeille.psd");
 			int n = r.getFrameCount();
 			for (int i = 0; i < n; i++) {
 				// If flag = 10 then the layer is not visible

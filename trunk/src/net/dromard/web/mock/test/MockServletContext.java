@@ -20,7 +20,7 @@ import javax.servlet.ServletException;
  * This is a mock implementation of ServletContext class.
  * It is design to be used for unit tests.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public class MockServletContext implements ServletContext {
 

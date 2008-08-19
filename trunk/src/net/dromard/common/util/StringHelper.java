@@ -12,7 +12,14 @@ import java.util.Vector;
  *   | History |
  *   +---------+
  *
- * 07/09/2007 by Gabriel Dromard
+ * 07/04/2008 by Cyril Ronseaux
+ * Add method:
+ *  - String join(final Object[] array, final String delimiter)
+ *  - String getSimpleName(final Class c)
+ * Changed boolean equals(final String s1, final String s2) to deprecated. It already
+ *  exists in StringComparator.
+ *
+ * 16/08/2007 by Matthieu Salvador
  *  Add method:
  *  - String capitalize(String original, Char[] sperator)
  *
@@ -52,6 +59,7 @@ public final class StringHelper {
 
     /**
      * Replace all substring (pattern) found in string (original) with a given string (value).
+     * All parameters are expected (must not be null)
      * @param original The original string to parse.
      * @param pattern The pattern to match.
      * @param value The string that will replace the pattern.
@@ -59,13 +67,13 @@ public final class StringHelper {
      * @since 11/03/2005
      */
     public static String replaceAll(final String original, final String pattern, final String value) {
-        String copy = new String(original);
+        StringBuffer copy = new StringBuffer(original);
         int index = -1;
         while ((index = copy.indexOf(pattern, index)) > -1) {
-            copy = copy.substring(0, index) + value + copy.substring(index + pattern.length());
+            copy.replace(index, index + pattern.length(), value);
             index += value.length();
         }
-        return copy;
+        return copy.toString();
     }
 
     /**
@@ -135,13 +143,13 @@ public final class StringHelper {
     }
 
     /**
-     * Permet de tester si une chaine de caractére est numérique ou pas !
-     * @param source Chaine de caractére à tester
-     * @return Un boolean disant si la chaine est numérique ou pas !
+     * Test if the string is a number of type double.
+     * @param source String to be tested
+     * @return A boolean saying if the string has been successfully parsed
      */
     public static boolean isNumeric(final String source) {
         try {
-            Double.parseDouble(source.trim());
+            Double.parseDouble(source);
         } catch (Exception ex) {
             return false;
         }
@@ -149,31 +157,25 @@ public final class StringHelper {
     }
 
     /**
-     * Methodes permettant de récupérer le début de la chaine jusqu'au mot donnée.
-     * @param source Chaine de caractere 'source'
-     * @param word Mot à rechercher dans la chaine 'source' (Recherche de la premiére occurence)
-     * @return Chaine de caractere positionnée avant le mot à rechercher
+     * Retrieve the sub string starting at index 0 ending before the given word.
+     * @param source The string to be parsed
+     * @param word The token
+     * @return The substring if the word exists else the entire source string
      */
     public static String subStringBefore(final String source, final String word) {
         return subStringBefore(source, word, false);
     }
 
     /**
-     * Retreive the sub string before a given word from the given source string.<br>
+     * Retrieve the sub string starting at index 0 ending before the given word.
      * <b>Note:</b> If the word does not exists in it will return the original source.<br>
      * If the given source or word string is null it will return null also.
-     * @param source Chaine de caractere 'source'
-     * @param word Mot à rechercher dans la chaine 'source'
-     * @param theLast Recherche de la derniere occurence du mot ou pas !
-     * @return Chaine de caractere positionnée avant le mot à rechercher
+     * @param source The string to be parsed
+     * @param word The token
+     * @param theLast true to get the last word as token (if it is present more than one time)
+     * @return The substring if the word exists else the entire source string.
      */
     public static String subStringBefore(final String source, final String word, final boolean theLast) {
-        // Verification des parametres d'entrée
-        if (source == null || word == null) {
-            return null;
-        }
-
-        // Recherche de la premiére occurrence du mot dans la chaine
         int index;
         if (theLast) {
             index = source.lastIndexOf(word);
@@ -183,21 +185,18 @@ public final class StringHelper {
         if (index >= 0) {
             return source.substring(0, index);
         }
-
-        // debug("[subStringBefore] source ("+source+") ne contiend pas le mot : '"+word+"'");
         return source;
     }
 
     /**
-     * Methodes permettant de récupérer la chaine de caractére se trouvant entre deux mots.
-     * @param source Chaine de caractere 'source'
-     * @param firstWord Premier mot de référence à rechercher dans la chaine 'source'
-     * @param secondWord Second mot de référence à rechercher dans la chaine 'source'
-     * @return
-     * <LI>La chaine de caractére se trouvant entre deux mots</LI>
-     * <LI>Chaine de caractere positionnée avant le second mot recherché si le premier n'existe pas</LI>
-     * <LI>Chaine de caractere positionnée après le premier mot recherché si le second n'existe pas</LI>
-     * <LI>'<b><font color='darkblue'>null</font></b>' si les deux mots n'ont pas été trouvés</LI>
+     * Retrieve the substring which is placed between two word.
+     * @param source The string to be parsed
+     * @param firstWord The first token
+     * @param secondWord The second token
+     * @return the substring which is placed between two word,
+     * or the substring before the second word if the first one is not present,
+     * or the substring after the first word if the second one is not present,
+     * or the source string if no words are founds.
      */
     public static String subStringBeetwen(final String source, final String firstWord, final String secondWord) {
         String src = source;
@@ -215,24 +214,27 @@ public final class StringHelper {
     }
 
     /**
-     * Methodes permettant de savoir s'il existe un mot dans une chaine de caractére.
-     * @param source Chaine de caractere 'source'
-     * @param word Mot à rechercher dans la chaine 'source' (Recherche de la premiére occurence)
-     * @return Chaine de caractere positionnée après le mot à rechercher
+     * Retrieve the sub string starting before the given word ending at the end of the source string.
+     * <b>Note:</b> If the word does not exists in it will return the original source.<br>
+     * If the given source or word string is null it will return null also.
+     * @param source The string to be parsed
+     * @param word The token
+     * @return The substring if the word exists else the entire source string.
      */
     public static String subStringAfter(final String source, final String word) {
         return subStringAfter(source, word, false);
     }
 
     /**
-     * Methodes permettant de savoir s'il existe un mot dans une chaine de caractére.
-     * @param source Chaine de caractere 'source'
-     * @param word Mot à rechercher dans la chaine 'source' (Recherche de la premiére occurence)
-     * @param theLast Recherche de la derniere occurence du mot ou pas !
-     * @return Chaine de caractere positionnée après le mot à rechercher
+     * Retrieve the sub string starting before the given word ending at the end of the source string.
+     * <b>Note:</b> If the word does not exists in it will return the original source.<br>
+     * If the given source or word string is null it will return null also.
+     * @param source The string to be parsed
+     * @param word The token
+     * @param theLast true to get the last word as token (if it is present more than one time)
+     * @return The substring if the word exists else the entire source string.
      */
     public static String subStringAfter(final String source, final String word, final boolean theLast) {
-        // Verification des parametres d'entrée
         if (source == null || word == null) {
             return null;
         }
@@ -273,11 +275,10 @@ public final class StringHelper {
     }
 
     /**
-     * This is a static tool method to split a string in an array.
+     * This is a static tool method to split a string in an array. NOTA: This implementation does not return an empty element if 2 delimiters are join
      * @param string The original string to split.
      * @param delimiters The token to use to delimit the different fields, each characters are used as one token.
      * @return A string array.
-     * @deprecated This implementation does not return an empty element if 2 delimiters are join
      */
     public static String[] normalSplit(final String string, final String delimiters) {
         StringTokenizer tokenizer = new StringTokenizer(string, delimiters);
@@ -312,7 +313,30 @@ public final class StringHelper {
     }
 
     /**
-     * This function replace all 'fields' by its coresponding 'values' in the source string.
+     * @param array array to merge into a string.
+     * @param delimiter delimiter to place between two items of the array. if <code>null</code> no delimiter is used.
+     * @return a string representation of the array.
+     */
+    public static String join(final Object[] array, final String delimiter) {
+        if (array == null) {
+            return null;
+        }
+
+        StringBuffer joined = new StringBuffer("");
+        if (array.length > 0) { // has at least one element.
+            joined.append(array[0]);
+            for (int i = 1; i < array.length; i++) {
+                if (delimiter != null) {
+                    joined.append(delimiter);
+                }
+                joined.append(array[i]);
+            }
+        }
+        return joined.toString();
+    }
+
+    /**
+     * This function replace all 'fields' by its corresponding 'values' in the source string.
      * @param source Source String.
      * @param fields Fields to be replaced.
      * @param values Values of each fields.
@@ -326,21 +350,6 @@ public final class StringHelper {
         return toReturn;
     }
 
-    /**
-     * This function replace all 'word' by an other ('replace') in the source string.
-     * @param source Source String.
-     * @param word Word to be replaced.
-     * @param replace Word replaced.
-     * @return The String with <i>'word'</i> replaced by <i>'replace'</i>.
-     * @deprecated use replaceAll public static String replace(String source, String word, String replace) { return replaceAll(source, word, replace); /* //
-     * Take a char that is not the token, add it at the end so as to take in account the last word // if it's at the end of the string (because the
-     * split() forget it if it is at the end) boolean removeLastChar = source.lastIndexOf(word) == source.length()-word.length(); if(removeLastChar)
-     * source = source.substring(0, source.length()) + (char)(word.charAt(0)+1);
-     *
-     * Object[] split = split(source, word); String toReturn = ""; for(int i=0; i<split.length; i++) { toReturn += split[i]; if(i<split.length-1)
-     * toReturn+=replace; } if(removeLastChar) toReturn = toReturn.substring(0, toReturn.length()-1); return toReturn;
-     */
-    // }
     /**
      * Trim any of the characters contained in the second string from the beginning and end of the first.
      *
@@ -395,6 +404,25 @@ public final class StringHelper {
     }
 
     /**
+     * Returns whether the string holds no valuable data.
+     * @param string string under test.
+     * @return <code>true</code> if string is null, zero-length or can be trimmed to zero-length. <code>false</code> otherwise.
+     */
+    public static boolean isEmpty(final String string) {
+        // Try to optimize by limiting the call to the trim() method !
+        return string == null || string.length() == 0 || string.trim().length() == 0;
+    }
+
+    /**
+     * Returns whether the string holds no valuable data.
+     * @param strings strings under test.
+     * @return <code>true</code> if string is null, zero-length or can be trimmed to zero-length. <code>false</code> otherwise.
+     */
+    public static boolean isEmpty(final String[] strings) {
+        return strings == null || strings.length == 0;
+    }
+
+    /**
      * Pad the beginning of the given String with spaces untilthe String is of the given length.
      * <p>
      * If a String is longer than the desired length, it will not be truncated, however no padding will be added.
@@ -411,7 +439,6 @@ public final class StringHelper {
      * Pre-pend the given character to the String until the result is the desired length.
      * <p>
      * If a String is longer than the desired length, it will not be truncated, however no padding will be added.
-     *
      * @param s String to be padded.
      * @param length desired length of result.
      * @param c padding character.
@@ -434,7 +461,6 @@ public final class StringHelper {
      * Pad the end of the given String with spaces until the String is of the given length.
      * <p>
      * If a String is longer than the desired length, it will not be truncated, however no padding will be added.
-     *
      * @param s String to be padded.
      * @param length desired length of result.
      * @return padded String.
@@ -447,7 +473,6 @@ public final class StringHelper {
      * Append the given character to the String until the result is the desired length.
      * <p>
      * If a String is longer than the desired length, it will not be truncated, however no padding will be added.
-     *
      * @param s String to be padded.
      * @param length desired length of result.
      * @param c padding character.
@@ -474,7 +499,6 @@ public final class StringHelper {
      * will be added to the end.
      * <p>
      * If a String is longer than the desired length, it will not be truncated, however no padding will be added.
-     *
      * @param s String to be padded.
      * @param length desired length of result.
      * @return padded String.
@@ -491,7 +515,6 @@ public final class StringHelper {
      * will be added to the end.
      * <p>
      * If a String is longer than the desired length, it will not be truncated, however no padding will be added.
-     *
      * @param s String to be padded.
      * @param length desired length of result.
      * @param c padding character.
@@ -518,7 +541,7 @@ public final class StringHelper {
     /**
      * Convert an array to a string using given separator.
      * @param array     The array to convert
-     * @param separator The string separator to be used for convertion.
+     * @param separator The string separator to be used for conversion.
      * @return the coverage
      */
     public static String arrayToString(final Object[] array, final String separator) {
@@ -555,9 +578,8 @@ public final class StringHelper {
     }
 
     /**
-     * Capitalize a string by setting it to lowercase and upcasing the first characters.
-     * The first character as well as all character following one of the defined delimiter.
-     * are switched to upercase.
+     * Capitalize a string by setting it to lower case and upcasing the first characters. The first character as well as all character following one of
+     * the defined delimiter. are switched to upper case.
      * @param original string to capitalize
      * @param separator set of characters considered as separators to identify individual words.
      * @return Capitalized string.
@@ -605,4 +627,13 @@ public final class StringHelper {
         }
         return buffer.toString();
     }
+
+    /**
+     * @param c Class we want the name of.
+     * @return the simple name of a class, i.e. its name without package.
+     */
+    public static String getSimpleName(final Class c) {
+        return c.getName().substring(c.getName().lastIndexOf('.') + 1);
+    }
+
 }

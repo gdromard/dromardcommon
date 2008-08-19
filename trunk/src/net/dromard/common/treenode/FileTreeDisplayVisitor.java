@@ -7,7 +7,7 @@ import net.dromard.common.visitable.Visitor;
 /**
  * Visitor implementation for FileTreeDisplay.
  * <br>
- * @author          Pingus
+ * @author Gabriel Dromard
  */
 public class FileTreeDisplayVisitor implements Visitor {
 

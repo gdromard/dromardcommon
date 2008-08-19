@@ -25,7 +25,7 @@ import net.dromard.web.taglib.TemplateTagHelper;
  *    </tag:body>
  * </pre>
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public class HeadTag extends AbstractTemplateTag {
     /** SerialUID. */

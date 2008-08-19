@@ -3,7 +3,7 @@ package net.dromard.common.visitable;
 /**
  * Visitable pattern interface.
  * <br>
- * @author          Pingus
+ * @author Gabriel Dromard
  */
 public interface Visitable {
     /**

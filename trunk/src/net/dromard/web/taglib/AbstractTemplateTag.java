@@ -18,7 +18,7 @@ import net.dromard.common.util.StringHelper;
 /**
  * Abstract Tag class.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public abstract class AbstractTemplateTag extends BodyTagSupport implements ITemplateTag {
     /** The regexp used to verify template value. */
@@ -100,7 +100,7 @@ public abstract class AbstractTemplateTag extends BodyTagSupport implements ITem
      * @return The EVAL integer type of the tag.
      * @throws JspException Can occured if something wrong append.
      */
-    public final int doStartTag() throws JspException {
+    public int doStartTag() throws JspException {
         try {
             if (evalType == -1) {
                 if (getTemplate().getGString().indexOf(TEMPLATE_CONTENT_SEPARATOR) == -1) {
@@ -118,7 +118,7 @@ public abstract class AbstractTemplateTag extends BodyTagSupport implements ITem
             if (toPrint != null) {
                 toPrint = transform(toPrint);
                 if (toPrint != null) {
-                    pageContext.getOut().print(toPrint);
+                    printOut(toPrint);
                 }
             }
         } catch (IOException ex) {
@@ -161,6 +161,8 @@ public abstract class AbstractTemplateTag extends BodyTagSupport implements ITem
                         result = StringHelper.replaceAll(result, "${" + var + "}", innerValue);
                     }
                 }
+            } else {
+                result = StringHelper.replaceAll(result, "${" + var + "}", "");
             }
         }
         return result;
@@ -178,7 +180,7 @@ public abstract class AbstractTemplateTag extends BodyTagSupport implements ITem
     }
 
     /**
-     * Util method to retreive the value of a variable from GString parameters or (if nothing was found) in âge context.
+     * Util method to retreive the value of a variable from GString parameters or (if nothing was found) in ?ge context.
      * @param variable The variable name on which to retrieve the value
      * @return The variable value (or null if nothing found)
      * @throws IOException Can be thrown by the getTemplate() method.
@@ -188,7 +190,14 @@ public abstract class AbstractTemplateTag extends BodyTagSupport implements ITem
         if (variable != null) {
             innerValue = getTemplate().getParameter(variable);
             if (innerValue == null || innerValue.equals("${" + variable + "}")) {
-                innerValue = (String) pageContext.getAttribute(variable);
+                Object o = pageContext.getAttribute(variable);
+                if (o == null) {
+                    innerValue = "";
+                } else if (o instanceof String) {
+                    innerValue = (String) o;
+                } else {
+                    innerValue = o.toString();
+                }
             }
         }
         return innerValue;
@@ -208,7 +217,7 @@ public abstract class AbstractTemplateTag extends BodyTagSupport implements ITem
             if (toPrint != null) {
                 toPrint = transform(toPrint);
                 if (toPrint != null) {
-                    pageContext.getOut().print(toPrint);
+                    printOut(toPrint);
                 }
             }
 		} catch (IOException ex) {
@@ -216,4 +225,13 @@ public abstract class AbstractTemplateTag extends BodyTagSupport implements ITem
 		}
 		return Tag.SKIP_BODY;
 	}
+
+    /**
+     * Called when wanted to print something out to the page.
+     * @param toPrint The string to be printed.
+     * @throws IOException Can be thrown by PageContext while printing.
+     */
+    protected void printOut(final String toPrint) throws IOException {
+        pageContext.getOut().print(toPrint);
+    }
 }

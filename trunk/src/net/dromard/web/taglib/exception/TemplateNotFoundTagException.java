@@ -9,7 +9,7 @@ import javax.servlet.jsp.JspTagException;
 /**
  * Custom Exception that is thrown when the template is not found.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public class TemplateNotFoundTagException extends JspTagException {
     /** Serial UID. */

@@ -11,15 +11,15 @@ import java.util.Set;
 /**
  * Hash table of soft references.
  * <br>
- * @author          Pingus
+ * @author Gabriel Dromard
  */
 public class SoftHashtable extends Hashtable {
     /** Serial UID. */
     private static final long serialVersionUID = -5402199747809994434L;
 
     /**
-     * Retreive the original object, if exists.
-     * @param key The object key to retreive.
+     * Retrieve the original object, if exists.
+     * @param key The object key to retrieve.
      * @return The original object, if exists.
      */
     public final Object get(final Object key) {
@@ -71,7 +71,7 @@ public class SoftHashtable extends Hashtable {
     }
 
     /**
-     * Retreive the number of SoftReference.
+     * Retrieve the number of SoftReference.
      * <font color="red"><b>Note:</b> An object store into a reference can be cleared, <b>but counted</b> because the reference can still exists even if the object has been cleared</font>
      * @return The number of SoftReference <font color="red"><b>Which can be different to the number of object</b></font>.
      */

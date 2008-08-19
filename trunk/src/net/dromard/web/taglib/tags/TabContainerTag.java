@@ -26,7 +26,7 @@ import net.dromard.web.taglib.TemplateTagHelper;
  * </pre>
  * @see TabContentTag#TabContentTag()
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public class TabContainerTag extends AbstractTemplateTag {
     /** Serial UID. */

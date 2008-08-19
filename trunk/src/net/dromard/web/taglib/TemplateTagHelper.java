@@ -15,7 +15,7 @@ import net.dromard.common.templating.GString;
 /**
  * Helper class for templates.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public final class TemplateTagHelper {
     /** The folder where templates are stored. */
@@ -57,8 +57,8 @@ public final class TemplateTagHelper {
             // Check if the template content is estenalized into a file:
             File templateFile = new File(pageContext.getServletContext().getRealPath(TEMPLATE_ROOT_FOLDER + templateValue));
             if (templateFile.exists()) {
-                // ... in this case we load the file content as template.
-                gstring = GString.load(new FileInputStream(templateFile));
+                // ... in this case we load the file content as template. Expecting an UTF-8 file.
+                gstring = GString.load(new FileInputStream(templateFile), "UTF-8");
                 gstring.setParameters(properties);
             } else {
                 // ... in this case we keep the property value as template content.

@@ -7,7 +7,7 @@ import net.dromard.common.visitable.Visitor;
 
 /**
  * File tree node object.
- * @author Pingus
+ * @author Gabriel Dromard
  */
 public class FileTreeNode {
 	/** Parent TreeNode. */

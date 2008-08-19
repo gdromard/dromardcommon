@@ -9,7 +9,7 @@ import javax.servlet.jsp.JspTagException;
 /**
  * Custom Exception.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public class InvalidAttributeValueTagException extends JspTagException {
     /** Serial UID. */

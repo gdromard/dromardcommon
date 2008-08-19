@@ -1,17 +1,18 @@
 package net.dromard.common.util;
 
 /**
- * <p>Title: Mailler</p>
- * <p>Description: </p>
- * <p>Copyright: Copyright (c) 2003</p>
- * <p>Company: </p>
+ * Credential helper class.
  * @author Gabriel Dromard
- * @version 1.0
  */
-public class Credential {
+public final class Credential {
 	protected String encodedCredential="";
 
-	public Credential(String credential, boolean encrypted) {
+    /** Helper class must not be instanciated. */
+    private Credential() {
+        // Private Helper constructor
+    }
+
+	public Credential(final String credential, final boolean encrypted) {
 		if(encrypted) {
 			this.encodedCredential=credential;
 		} else {
@@ -32,11 +33,11 @@ public class Credential {
 		}
 	}
 
-	public boolean equals(String other) {
+	public boolean equals(final String other) {
 		return this.getDecodedCredential().equalsIgnoreCase(other);
 	}
 
-	public boolean equals(Credential other) {
+	public boolean equals(final Credential other) {
 		return this.getCredential().equalsIgnoreCase(other.getCredential());
 	}
 
@@ -44,7 +45,7 @@ public class Credential {
 		return getCredential();
 	}
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		try {
 			if(args.length==2) {
 				if(args[0].equalsIgnoreCase("-decode")) {
@@ -61,19 +62,16 @@ public class Credential {
 		}
 	}
 
-	/************************ Encrypting *****************************/
-	// encode/decode bit stream by groups of 6 (total 64 combinations)
-	static int MASK=0x3f;
-	static int N_MASK=~MASK;
+    // Encode bit stream by groups of 6 (total 64 combinations)
+    private static int MASK = 0x3f;
+    private static int N_MASK=~MASK;
+    private static char[] mCharSet = null;
+    private static int[] mAscii; // reversed mCharSet
 
-	static char[] m_charSet=null;
-	static int[] m_Ascii; // reversed m_charSet
-
-	static {
-		if(m_charSet==null) {
-			m_Ascii=new int[256];
+    static {
+        if (mCharSet == null) {
+            mAscii = new int[256];
 			int i;
-			int n=0x40; // initial char
 			StringBuffer sb=new StringBuffer(64);
 
 			for(i=0; i<='z'-'a'; i++) {
@@ -93,30 +91,42 @@ public class Credential {
 			}
 			sb.append('+');
 
-			m_charSet=new char[64];
-			sb.getChars(0, 64, m_charSet, 0);
-			m_Ascii=new int[256];
+            mCharSet = new char[64];
+            sb.getChars(0, 64, mCharSet, 0);
+            mAscii = new int[256];
 			for(i=0; i<256; i++) {
-				m_Ascii[i]=-1;
+                mAscii[i] = -1;
 			}
-			for(i=0; i<m_charSet.length; i++) {
-				m_Ascii[m_charSet[i]]=i;
+            for (i = 0; i < mCharSet.length; i++) {
+                mAscii[mCharSet[i]] = i;
 			}
 		}
 	}
 
-	public static String encode(String s) {
-		if(s==null) return null;
+    /**
+     * Encode a credential.
+     * @param credential The credential that have to be encoded.
+     * @return The encoded credential.
+     */
+    public static String encode(final String credential) {
+        if (credential == null) {
+            return null;
+        }
 		byte[] b;
-
-		b=s.getBytes();
+        b = credential.getBytes();
 		b=encode(b);
-		for(int i=0; i<b.length; i++) b[i]=(byte)m_charSet[b[i]];
-
+        for (int i = 0; i < b.length; i++) {
+            b[i] = (byte) mCharSet[b[i]];
+        }
 		return new String(b);
 	}
 
-	protected static byte[] encode(byte[] b) {
+    /**
+     * Encode bytes.
+     * @param b An array of byte.
+     * @return An encoded array of bytes.
+     */
+    protected static byte[] encode(final byte[] b) {
 		int size=b.length;
 		int outSize=(size*8+5)/6;
 		byte[] bo=new byte[outSize];
@@ -146,29 +156,30 @@ public class Credential {
 		if(offs!=0) {
 			w=(byte)(w<<(6-offs));
 			w=(byte)(w&MASK); // cleanup
-			bo[j]=(byte)w;
+            bo[j] = w;
 		}
 
 		return bo;
 	}
 
-	protected static String decode(String credential) throws Exception {
-		if(credential==null) return null;
-		byte[] b=new byte[credential.length()];
-		b=credential.getBytes();
+	protected static String decode(final String credential) throws Exception {
+		if (credential == null)
+			return null;
+		byte[] b = new byte[credential.length()];
+		b = credential.getBytes();
 
-		for(int i=0; i<b.length; i++) {
-			int k=m_Ascii[b[i]];
-			if(k<0) {
+		for (int i = 0; i < b.length; i++) {
+			int k = mAscii[b[i]];
+			if (k < 0) {
 				throw new Exception("Invalid data");
 			}
-			b[i]=(byte)k;
+			b[i] = (byte) k;
 		}
-		b=decode(b);
+		b = decode(b);
 		return new String(b);
 	}
 
-	protected static byte[] decode(byte[] credential) throws Exception {
+	protected static byte[] decode(final byte[] credential) throws Exception {
 		int size=credential.length;
 
 		if((size%4)==1) {

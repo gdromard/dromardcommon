@@ -29,7 +29,7 @@ import net.dromard.web.taglib.TemplateTagHelper;
  * </pre>
  * @see TabContainerTag#TabContainerTag()
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public class TabContentTag extends AbstractTemplateTag {
     /** Serial UID. */
@@ -66,32 +66,12 @@ public class TabContentTag extends AbstractTemplateTag {
     }
 
     /**
-     * @param tabName the tabName to set
-     * @throws JspException In the case of an invalid value is given or template is not found.
-     */
-    public final void setTabName(final String tabName) throws JspException {
-        addParameter("tabName", tabName);
-    }
-
-    /**
-     * @param function the function to set
-     * @throws JspException In the case of an invalid value is given or template is not found.
-     */
-    public final void setFunction(final String function) throws JspException {
-        addParameter("function", function);
-    }
-
-    /**
      * @param selected the selected to set
      * @throws JspException In the case of an invalid value is given or template is not found.
      */
     public final void setSelected(final String selected) throws JspException {
         try {
-            if (transform(selected).equalsIgnoreCase("true")) {
-                addParameter("class", "selected");
-            } else {
-                addParameter("class", "unselected");
-            }
+            setSelected(transform(selected).equalsIgnoreCase("true"));
         } catch (IOException ex) {
             throw new JspTagException(ex.getMessage());
         }
@@ -101,19 +81,11 @@ public class TabContentTag extends AbstractTemplateTag {
      * @param selected the selected to set
      * @throws JspException In the case of an invalid value is given or template is not found.
      */
-    public final void setSelected(final boolean selected) throws JspException {
+    private void setSelected(final boolean selected) throws JspException {
         if (selected) {
             addParameter("class", "selected");
-        }
-    }
-
-    /**
-     * @param tabindex Tab index of the ahref html element.
-     * @throws JspException In the case of an invalid value is given or template is not found.
-     */
-    public final void setTabindex(final String tabindex) throws JspException {
-        if (tabindex != null && tabindex.length() > 0) {
-            addParameter("tabindex", "tabindex=\"" + tabindex + "\"");
+        } else {
+            addParameter("class", "unselected");
         }
     }
 }

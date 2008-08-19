@@ -7,7 +7,7 @@ import net.dromard.common.templating.GString;
 /**
  * Abstract Tag class.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public interface ITemplateTag  {
     /**

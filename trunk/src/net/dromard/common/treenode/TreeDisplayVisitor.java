@@ -6,9 +6,9 @@ import net.dromard.common.visitable.Visitor;
 /**
  * Visitor implementation for TreeDisplay.
  * <br>
- * @author          Pingus
+ * @author Gabriel Dromard
  */
-public class TreeDisplayVisitor implements Visitor {
+public class TreeDisplayVisitor extends DefaultTreeNodeVisitor implements Visitor {
 
     /**
      * Vist implementation.
@@ -20,15 +20,15 @@ public class TreeDisplayVisitor implements Visitor {
             throw new ClassCastException("TreeNode expected");
         }
 
+        // Print indentation
         for (int i = 0; i < ((TreeNode) node).getRank(); i++) {
             System.out.print("   ");
         }
+        // Print node data
         System.out.println(((TreeNode) node).getData().toString());
 
-        for (Iterator i = ((TreeNode) node).getChilds().iterator(); i.hasNext();) {
-            TreeNode childNode = (TreeNode) (i.next());
-            childNode.accept(this);
-        }
+        // Continue visit
+        acceptChilds(node);
     }
 
     /**

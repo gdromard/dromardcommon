@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -23,7 +24,7 @@ import javax.servlet.http.HttpSession;
 /**
  * ...
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 
 public class MockHttpServletRequest implements HttpServletRequest, ServletRequest {
@@ -31,6 +32,11 @@ public class MockHttpServletRequest implements HttpServletRequest, ServletReques
     private Locale locale = Locale.ENGLISH;
     /** Attributes. */
     private HashMap attributes = new HashMap();
+    /** Parameters. */
+    private HashMap parameters = new HashMap();
+    /** Session. */
+    private MockHttpSession session = new MockHttpSession();
+    private String remoteUser;
 
     /**
      * Default constructor.
@@ -186,12 +192,19 @@ public class MockHttpServletRequest implements HttpServletRequest, ServletReques
     }
 
     /**
-     * Empty implemenation.
-     * @return null
+     * Return remote user set with setRemoteUser(String remoteUser).
+     * @return The remoteUser
      * @see javax.servlet.http.HttpServletRequest#getRemoteUser()
      */
     public final String getRemoteUser() {
-        return null;
+        return remoteUser;
+    }
+
+    /**
+     * @param remoteUser The remote user
+     */
+    public final void setRemoteUser(final String remoteUser) {
+        this.remoteUser = remoteUser;
     }
 
     /**
@@ -236,7 +249,7 @@ public class MockHttpServletRequest implements HttpServletRequest, ServletReques
      * @see javax.servlet.http.HttpServletRequest#getSession()
      */
     public final HttpSession getSession() {
-        return null;
+        return session;
     }
 
     /**
@@ -246,7 +259,7 @@ public class MockHttpServletRequest implements HttpServletRequest, ServletReques
      * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
      */
     public final HttpSession getSession(final boolean argument) {
-        return null;
+        return session;
     }
 
     /**
@@ -360,22 +373,38 @@ public class MockHttpServletRequest implements HttpServletRequest, ServletReques
     }
 
     /**
-     * Empty implemenation.
      * @param argument argument
      * @return null
      * @see javax.servlet.ServletRequest#getParameter(java.lang.String)
      */
     public final String getParameter(final String argument) {
-        return null;
+        return (String) parameters.get(argument);
     }
 
     /**
-     * Empty implemenation.
-     * @return null
+     * @param key parameter key
+     * @param value parameter value
+     * @see javax.servlet.ServletRequest#getParameter(java.lang.String)
+     */
+    public final void setParameter(final String key, final String value) {
+        parameters.put(key, value);
+    }
+
+    /**
+     * @return the parameters map
      * @see javax.servlet.ServletRequest#getParameterMap()
      */
     public final Map getParameterMap() {
-        return null;
+        return parameters;
+    }
+
+    /**
+     * @param argument argument
+     * @return null
+     * @see javax.servlet.ServletRequest#getParameterValues(java.lang.String)
+     */
+    public final String[] getParameterValues(final String argument) {
+        return (String[]) parameters.keySet().toArray();
     }
 
     /**
@@ -384,16 +413,6 @@ public class MockHttpServletRequest implements HttpServletRequest, ServletReques
      * @see javax.servlet.ServletRequest#getParameterNames()
      */
     public final Enumeration getParameterNames() {
-        return null;
-    }
-
-    /**
-     * Empty implemenation.
-     * @param argument argument
-     * @return null
-     * @see javax.servlet.ServletRequest#getParameterValues(java.lang.String)
-     */
-    public final String[] getParameterValues(final String argument) {
         return null;
     }
 

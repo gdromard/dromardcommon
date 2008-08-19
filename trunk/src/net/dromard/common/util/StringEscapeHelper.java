@@ -1,6 +1,7 @@
 package net.dromard.common.util;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Utilities for String formatting, manipulation, and escaping. <br>
@@ -888,7 +889,7 @@ public final class StringEscapeHelper {
 
 
     /** Html Entities map. */
-    public static final HashMap HTML_ENTITIES = new HashMap();
+    public static final Map HTML_ENTITIES = new HashMap();
 
     static {
         HTML_ENTITIES.put("aacute", new Integer(MIN_AACUTE));
@@ -1208,6 +1209,10 @@ public final class StringEscapeHelper {
     public static String escapeXML(final String s) {
         if (s == null) {
             return null;
+        }
+        // Optimize by checking if parse is needed
+        if (s.indexOf('>') == -1 && s.indexOf('<') == -1 && s.indexOf('&') == -1 && s.indexOf('\'') == -1 && s.indexOf('"') == -1) {
+            return s;
         }
         int length = s.length();
         int newLength = length;

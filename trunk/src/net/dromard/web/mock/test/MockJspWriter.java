@@ -11,7 +11,7 @@ import javax.servlet.jsp.JspWriter;
 /**
  * An implemenation of JspWriter so as to test Tag classes.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public class MockJspWriter extends JspWriter {
     /** Default buffer size. */

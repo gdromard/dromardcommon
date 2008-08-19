@@ -176,10 +176,11 @@ public class GString {
     /**
      * Create a GString instance using a file sontent as string template.
      * @param template The template inputstream.
+     * @param encoding stream encoding
      * @return The new GString instance.
      * @throws IOException Occured if you did a mistake in the given parameters ...
      */
-    public static GString load(final InputStream template) throws IOException {
-        return new GString(StreamHelper.getStreamContent(template));
+    public static GString load(final InputStream template, final String encoding) throws IOException {
+        return new GString(StreamHelper.getStreamContent(template, encoding));
     }
 }

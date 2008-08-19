@@ -14,7 +14,7 @@ import junit.framework.TestCase;
 /**
  * .
  * <br>
- * @author          Pingus
+ * @author Gabriel Dromard
  */
 public class StringEscapeHelperTest extends TestCase {
     private static final HashMap HTML_ENTITIES = new HashMap();

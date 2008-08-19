@@ -3,21 +3,21 @@
  */
 package net.dromard.web.taglib;
 
-import java.util.Hashtable;
+import java.util.Map;
 
 import net.dromard.common.util.SoftHashtable;
 
 /**
  * Helper class for templates.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public final class TemplateCacheManager {
     /** Cache that store templates. */
     private static final TemplateCacheManager INSTANCE = new TemplateCacheManager();
 
     /** The cache map. */
-    private Hashtable cache;
+    private Map cache;
 
     /**
      * Retreive the singleton instance of manager.

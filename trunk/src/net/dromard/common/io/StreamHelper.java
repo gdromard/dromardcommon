@@ -37,8 +37,26 @@ public final class StreamHelper {
     /**
      * This static method get the content from an input stream.
      * @param in The InputStream, where to read data.
+     * @param encoding stream encoding
      * @return The String representation of the stream.
      * @throws IOException Occured if you did a mistake in the given parameters ...
+     */
+    public static String getStreamContent(final InputStream in, final String encoding) throws IOException {
+        StringBuffer content = new StringBuffer();
+        int len;
+        byte[] b = new byte[BUFFER_SIZE];
+        while ((len = in.read(b)) != -1) {
+            content.append(new String(b, 0, len, encoding));
+        }
+        return content.toString();
+    }
+
+    /**
+     * This static method get the content from an input stream.
+     * @param in The InputStream, where to read data.
+     * @return The String representation of the stream.
+     * @throws IOException Occured if you did a mistake in the given parameters ...
+     * @deprecated use {@link #getStreamContent(InputStream, String)}
      */
     public static String getStreamContent(final InputStream in) throws IOException {
         StringBuffer content = new StringBuffer();

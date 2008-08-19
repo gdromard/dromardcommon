@@ -37,7 +37,8 @@ import java.util.Vector;
  * @author Gabriel Dromard
  */
 public class OrderedHashtable extends Hashtable {
-	// internal
+
+    /** Internal ordered keys. */
 	private Vector keys;
 
 
@@ -51,10 +52,10 @@ public class OrderedHashtable extends Hashtable {
 
     /**
      * @see java.util.Hashtable
-     * @param map
+     * @param map A existing map to fill the new one
      */
     @SuppressWarnings("unchecked")
-    public OrderedHashtable(Map map) { 
+    public OrderedHashtable(final Map map) { 
         super(map); 
         keys = new Vector(keySet());
     }
@@ -64,7 +65,7 @@ public class OrderedHashtable extends Hashtable {
      * @param columnIndex The HashMap element index
      * @return The HashMap Element
      */
-    public Object get(int columnIndex) { 
+    public final Object get(final int columnIndex) { 
         return get(keys.get(columnIndex));
     }
 
@@ -78,7 +79,7 @@ public class OrderedHashtable extends Hashtable {
      * @see java.util.Hashtable#keySet()
      * @see java.util.Map
      */
-    public synchronized Enumeration keys() {
+    public final synchronized Enumeration keys() {
         return keys.elements();
     }
     
@@ -94,8 +95,10 @@ public class OrderedHashtable extends Hashtable {
 	 *	       <tt>null</tt> with the specified javaKey.
 	 */
 	@SuppressWarnings("unchecked")
-    public Object put(Object key, Object value) {
-		if(!keys.contains(key)) keys.add(key);
+    public final Object put(final Object key, final Object value) {
+		if (!keys.contains(key)) {
+            keys.add(key);
+        }
 		return super.put(key, value);
 	}
 
@@ -108,7 +111,7 @@ public class OrderedHashtable extends Hashtable {
      * @throws NullPointerException if the specified map is null.
      */
     @SuppressWarnings("unchecked")
-    public void putAll(Map map) {
+    public final void putAll(final Map map) {
         System.out.println("putting all element from ");
         super.putAll(map);
         keys.addAll(keySet());
@@ -118,7 +121,7 @@ public class OrderedHashtable extends Hashtable {
 	 * Remove one object from the list.
 	 * @param key Remove the object with the given key
 	 */
-	public Object remove(Object key) {
+	public Object remove(final Object key) {
 		keys.remove(key); //System.out.println("[OrderedHashtable] Remove of object with key "+key+" ... "+((keys.remove(key))?"[DONE]":"[FAILED]"));
 		return super.remove(key);
 	}
@@ -129,7 +132,7 @@ public class OrderedHashtable extends Hashtable {
      *
      * @see java.util.Hashtable#clear()
      */
-    public void clear() {
+    public final void clear() {
         keys.clear();
         super.clear();
     }
@@ -143,28 +146,28 @@ public class OrderedHashtable extends Hashtable {
      *
      * @return  a clone of this vector.
      */
-    public Object clone() {
+    public final Object clone() {
         OrderedHashtable ret = (OrderedHashtable)super.clone();
         ret.keys = (Vector)keys.clone();
         return ret;
     }
 
 	/**
-     * 
 	 * @return An iterator view of the keys contained in this map.
 	 * @see	java.util.ArrayList#iterator()
 	 */
-	public Iterator iterator() {
+	public final Iterator iterator() {
 		return keys.iterator();
 	}
 
 	/**
+     * @param comparator An comparator to sort keys
 	 * @return	iterator view of the keys contained in this map.
 	 * @see	java.util.Iterator
 	 * @see java.util.ArrayList#iterator()
 	 */
 	@SuppressWarnings("unchecked")
-    public Iterator sortedIterator(Comparator comparator) {
+    public final Iterator sortedIterator(final Comparator comparator) {
 		Collections.sort(keys, comparator);
 		return keys.iterator();
 	}

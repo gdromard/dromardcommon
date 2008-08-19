@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.channels.FileChannel;
 
 /**
@@ -28,9 +29,31 @@ import java.nio.channels.FileChannel;
  * @author Gabriel Dromard
  * @version 1.0
  */
-public class FileHelper {
+public final class FileHelper {
+    /**
+     * Private empty constructor. So as be a valid util class.
+     */
+    private FileHelper() {
+    }
 
-    
+    /**
+     * Write string output.
+     * @param output   The Output stream, where to write data
+     * @param content  The content string to be written
+     * @param override Set it to true if you want to override the file if it already exists
+     * @throws IOException While creating the file - if override is true - or while
+     */
+    public static void writeToFile(final File output, final String content, final boolean override) throws IOException {
+        if (!output.exists()) {
+            output.createNewFile();
+        } else if (!override) {
+            throw new IOException("File " + output.getAbsolutePath() + " already exists");
+        }
+        PrintStream printter = new PrintStream(new FileOutputStream(output));
+        printter.print(content);
+        printter.close();
+    }
+
     /**
      * Save one file
      * @param fileName    File name to be saved

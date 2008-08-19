@@ -4,6 +4,8 @@
 
 package net.dromard.web.mock.test;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Enumeration;
 
@@ -21,12 +23,12 @@ import javax.servlet.jsp.PageContext;
 /**
  * This class is a very light implementation of Page context especialy for Testing the tag generation.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 
 public class MockPageContext extends PageContext {
     /** Out. */
-    private MockJspWriter out;
+    private JspWriter out;
     /** Request. */
     private HttpServletRequest request = new MockHttpServletRequest();
     /** Servlet Context. */
@@ -48,13 +50,19 @@ public class MockPageContext extends PageContext {
     }
 
     /**
+     * Default constructor.
+     */
+    public MockPageContext(final File file) throws IOException {
+        out = new MockFileJspWriter(new FileWriter(file));
+    }
+
+    /**
      * .
      * @param arg argument
      * @return null
      * @see javax.servlet.jsp.PageContext#findAttribute(java.lang.String)
      */
     public final Object findAttribute(final String arg) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -66,8 +74,6 @@ public class MockPageContext extends PageContext {
      * @throws IOException ...
      */
     public final void forward(final String arg) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -77,7 +83,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getAttribute(java.lang.String)
      */
     public final Object getAttribute(final String arg) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -89,7 +94,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getAttribute(java.lang.String, int)
      */
     public final Object getAttribute(final String arg, final int arg1) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -100,7 +104,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getAttributeNamesInScope(int)
      */
     public final Enumeration getAttributeNamesInScope(final int arg) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -111,7 +114,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getAttributesScope(java.lang.String)
      */
     public final int getAttributesScope(final String arg) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -121,7 +123,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getException()
      */
     public final Exception getException() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -139,7 +140,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getPage()
      */
     public final Object getPage() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -157,7 +157,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getResponse()
      */
     public final ServletResponse getResponse() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -167,7 +166,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getServletConfig()
      */
     public final ServletConfig getServletConfig() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -186,8 +184,7 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#getSession()
      */
     public final HttpSession getSession() {
-        // TODO Auto-generated method stub
-        return null;
+        return request.getSession();
     }
 
     /**
@@ -198,8 +195,6 @@ public class MockPageContext extends PageContext {
      * @throws IOException ...
      */
     public final void handlePageException(final Exception arg) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -210,8 +205,6 @@ public class MockPageContext extends PageContext {
      * @throws IOException ...
      */
     public final void handlePageException(final Throwable arg) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -222,8 +215,6 @@ public class MockPageContext extends PageContext {
      * @throws IOException ...
      */
     public void include(final String arg) throws ServletException, IOException {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -239,8 +230,6 @@ public class MockPageContext extends PageContext {
      * @throws IOException ...
      */
     public void initialize(final Servlet arg, final ServletRequest arg1, final ServletResponse arg2, final String arg3, final boolean arg4, final int arg5, final boolean arg6) throws IOException {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -248,8 +237,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#release()
      */
     public final void release() {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -258,8 +245,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#removeAttribute(java.lang.String)
      */
     public final void removeAttribute(final String arg) {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -269,8 +254,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#removeAttribute(java.lang.String, int)
      */
     public final void removeAttribute(final String arg, final int arg1) {
-        // TODO Auto-generated method stub
-
     }
 
     /**
@@ -280,8 +263,6 @@ public class MockPageContext extends PageContext {
      * @see javax.servlet.jsp.PageContext#setAttribute(java.lang.String, java.lang.Object)
      */
     public final void setAttribute(final String arg, final Object arg1) {
-        // TODO Auto-generated method stub
-
     }
 
     /**

@@ -1,6 +1,8 @@
 package net.dromard.common.treenode;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import net.dromard.common.visitable.Visitable;
 import net.dromard.common.visitable.Visitor;
@@ -9,13 +11,13 @@ import net.dromard.common.visitable.Visitor;
 /**
  * TreeNode implementation.
  * <br>
- * @author Pingus
+ * @author Gabriel Dromard
  */
 public class TreeNode implements Visitable {
     /** Parent TreeNode. */
     private TreeNode parent = null;
     /** Node childs. */
-    private ArrayList childs = new ArrayList();
+    private List childs = new ArrayList();
     /** Node attached object. */
     private Object data = null;
 
@@ -64,15 +66,33 @@ public class TreeNode implements Visitable {
      * Retreive the childs.
      * @return the childs
      */
-    public final ArrayList getChilds() {
+    public final List getChilds() {
         return childs;
     }
 
     /**
      * @param childs the childs to set
      */
-    public final void setChilds(final ArrayList childs) {
+    public final void setChilds(final List childs) {
         this.childs = childs;
+    }
+
+    /**
+     * @return How many nodes (including myself) in the tree ?
+     */
+    public final int size() {
+        int size = 1; // me !
+
+        // plus my children.
+        if (this.childs != null && this.childs.size() > 0) {
+            Iterator children = this.childs.iterator();
+            while (children.hasNext()) {
+                TreeNode child = (TreeNode) children.next();
+                size += child.size();
+            }
+        }
+
+        return size;
     }
 
     /**

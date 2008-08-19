@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -54,16 +55,23 @@ public class OrderedHashMap extends HashMap {
     @SuppressWarnings("unchecked")
     public OrderedHashMap(Map map) { 
 		this();
-        //System.out.println("[OrderedHashMap] OrderedHashMap(Map: '"+map+"')");
         super.putAll(map);
     }
-    
+
     /**
-     * Retreive the a HashMap element by its index
+     * Retreive the keys as a list.
+     * @return The keys
+     */
+    public final List keys() {
+        return keys;
+    }
+
+    /**
+     * Retreive the a HashMap element by its index.
      * @param columnIndex The HashMap element index
      * @return The HashMap Element
      */
-    public Object get(int columnIndex) { 
+    public final Object get(final int columnIndex) {
         return get(keys.get(columnIndex));
     }
 
@@ -78,10 +86,34 @@ public class OrderedHashMap extends HashMap {
 	 *	       also indicate that the HashMap previously associated
 	 *	       <tt>null</tt> with the specified javaKey.
 	 */
-	@SuppressWarnings("unchecked")
-    public Object put(Object key, Object value) {
-        //System.out.println("[OrderedHashMap] put(Object: '"+key+"', Object: '"+value+"')");
-		if(!keys.contains(key)) keys.add(key);
+    public final Object put(final Object key, final Object value) {
+		if (!keys.contains(key)) {
+            keys.add(key);
+        }
+		return super.put(key, value);
+	}
+
+    /**
+     * Associates the specified value with the specified javaKey in this map adding it at the specified position.
+     * If the map previously contained a mapping for this javaKey, the old value is replaced.
+     *
+     * @param position The index position (order).
+     * @param key      javaKey with which the specified value is to be associated.
+     * @param value    value to be associated with the specified javaKey.
+     * @return previous value associated with specified javaKey, or <tt>null</tt>
+     *         if there was no mapping for javaKey.  A <tt>null</tt> return can
+     *         also indicate that the HashMap previously associated
+     *         <tt>null</tt> with the specified javaKey.
+     */
+    public final Object put(final int position, final Object key, final Object value) {
+        if (keys.size() <= position) {
+            for (int i = keys.size(); i <= position; ++i) {
+                keys.add(i, null);
+            }
+        }
+        if (!keys.contains(key)) {
+            keys.add(position, key);
+        }
 		return super.put(key, value);
 	}
 
@@ -93,9 +125,7 @@ public class OrderedHashMap extends HashMap {
      * @param map Mappings to be stored in this map.
      * @throws NullPointerException if the specified map is null.
      */
-    @SuppressWarnings("unchecked")
-    public void putAll(Map map) {
-        //System.out.println("[OrderedHashMap] putAll(Map: '"+map+"')");
+    public final void putAll(final Map map) {
         super.putAll(map);
         keys.addAll(keySet());
     }
@@ -106,7 +136,7 @@ public class OrderedHashMap extends HashMap {
      *
      * @see java.util.Hashtable#clear()
      */
-    public void clear() {
+    public final void clear() {
         keys.clear();
         super.clear();
     }
@@ -120,7 +150,7 @@ public class OrderedHashMap extends HashMap {
      *
      * @return  a clone of this vector.
      */
-    public Object clone() {
+    public final Object clone() {
         OrderedHashMap ret = (OrderedHashMap)super.clone();
         ret.keys = (ArrayList)keys.clone();
         return ret;
@@ -129,9 +159,10 @@ public class OrderedHashMap extends HashMap {
 	/**
 	 * Remove one object from the list.
 	 * @param key Remove the object with the given key
+     * @return the removed object
 	 */
-	public Object remove(Object key) {
-	    keys.remove(key); //System.out.println("[OrderedHashMap] Remove of object with key "+key+" ... "+((keys.remove(key))?"[DONE]":"[FAILED]"));
+	public Object remove(final Object key) {
+	    keys.remove(key);
 	    return super.remove(key);
 	}
 	
@@ -140,18 +171,26 @@ public class OrderedHashMap extends HashMap {
 	 * @see	java.util.Iterator
 	 * @see ArrayList#iterator()
 	 */
-	public Iterator iterator() {
+	public final Iterator iterator() {
 		return keys.iterator();
 	}
 
 	/**
+     * Sort keys with using a given comparator.
+     * @param comparator The comparator.
+     */
+    public final void sortKeys(final Comparator comparator) {
+        Collections.sort(keys, comparator);
+    }
+
+	/**
+     * @param comparator An comparator to sort keys
 	 * @return	iterator view of the keys contained in this map.
 	 * @see	java.util.Iterator
 	 * @see ArrayList#iterator()
 	 */
-	@SuppressWarnings("unchecked")
-    public Iterator sortedIterator(Comparator comparator) {
-		Collections.sort(keys, comparator);
+    public final Iterator sortedIterator(final Comparator comparator) {
+		sortKeys(comparator);
 		return keys.iterator();
 	}
 }

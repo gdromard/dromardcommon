@@ -6,8 +6,7 @@ package net.dromard.common.templating.reflect;
 /**
  * formater of methods returned result.
  * <br>
- * @author          Pingus
- * @copyright       CIMPA 2007. All rights reserved.
+ * @author Gabriel Dromard
  */
 public interface Formatter {
     /**

@@ -15,7 +15,7 @@ import net.dromard.web.taglib.AbstractTemplateTag;
 /**
  * This class is a TestCase abstract implementation design to be extended in your junit tag lib tests.
  * <br>
- * @author          st22085
+ * @author Gabriel Dromard
  */
 public abstract class AbstractTemplateTagTest extends TestCase {
     /** The tag instance to be tested. */
