@@ -30,7 +30,7 @@ public class WordTokenizer implements Enumeration {
      * @return true if there is still some elements.
      */
     public final boolean hasMoreElements() {
-        return (string != null);
+        return (string != null && string.length() > 0);
     }
 
     /**
@@ -75,9 +75,9 @@ public class WordTokenizer implements Enumeration {
      */
     public static ArrayList split(final String line, final String delemiter) {
         WordTokenizer tokenizer = new WordTokenizer(line, delemiter);
-        ArrayList list = new ArrayList();
+        ArrayList<String> list = new ArrayList<String>();
         while (tokenizer.hasMoreElements()) {
-            list.add(tokenizer.nextElement());
+            list.add((String) tokenizer.nextElement());
         }
         return list;
     }

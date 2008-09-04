@@ -116,14 +116,19 @@ public class JCustomBar extends JPanel {
         bar.add(logo);
         bar.addButton("Add", new AbstractAction() {
         	public void actionPerformed(ActionEvent e) {
+        		final int btn = bar.buttons.size();
 				bar.addButton("Remove", new AbstractAction() {
 		        	public void actionPerformed(ActionEvent e) {
-						bar.removeButtons(2);
+						bar.removeButtons(btn);
 					}
 		        });
 			}
         });
-        JCustomHeader header = new JCustomHeader("Fait Main", "Réutiliser ses magazine ...", Color.GRAY, Color.WHITE, Color.BLACK);
+        JCustomHeader header = new JCustomHeader("Fait Main", "Réutiliser ses magazine ...");
+        header.setBackground(Color.WHITE);
+        header.setForeground(Color.GRAY);
+        header.setLinesColors(Color.WHITE, Color.BLACK);
+        //header.setBackgroundColors(Color.BLACK, Color.WHITE);
         header.setFont(Font.decode("Haettenschweiler-PLAIN-60"));
         header.setSubTitleFont(Font.decode("Monotype Corsiva BOLD 20"));
         panel.add(header, BorderLayout.NORTH);

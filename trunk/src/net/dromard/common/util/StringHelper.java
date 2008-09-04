@@ -268,27 +268,25 @@ public final class StringHelper {
         for (int i = 0; i < len; ++i) {
             padding = padding + pad;
         }
-        if (padLength < 0) {
-            return padding + string;
-        }
-        return string + padding;
+        return (padLength < 0 ? padding + string : string + padding);
     }
 
     /**
-     * This is a static tool method to split a string in an array. NOTA: This implementation does not return an empty element if 2 delimiters are join
+     * This is a static tool method to split a string in an array.
      * @param string The original string to split.
      * @param delimiters The token to use to delimit the different fields, each characters are used as one token.
      * @return A string array.
+     * @deprecated This implementation does not return an empty element if 2 delimiters are join
      */
     public static String[] normalSplit(final String string, final String delimiters) {
         StringTokenizer tokenizer = new StringTokenizer(string, delimiters);
-        Vector fields = new Vector();
+        Vector<String> fields = new Vector<String>();
         while (tokenizer.hasMoreElements()) {
-            fields.add(tokenizer.nextElement());
+            fields.add((String) tokenizer.nextElement());
         }
         String[] result = new String[fields.size()];
         for (int i = 0; i < result.length; ++i) {
-            result[i] = (String) fields.get(i);
+            result[i] = fields.get(i);
         }
         return result;
     }
@@ -301,13 +299,13 @@ public final class StringHelper {
      */
     public static String[] split(final String string, final String delimiter) {
         WordTokenizer tokenizer = new WordTokenizer(string, delimiter);
-        Vector fields = new Vector();
+        Vector<String> fields = new Vector<String>();
         while (tokenizer.hasMoreElements()) {
-            fields.add(tokenizer.nextElement());
+            fields.add((String) tokenizer.nextElement());
         }
         String[] result = new String[fields.size()];
         for (int i = 0; i < result.length; ++i) {
-            result[i] = (String) fields.get(i);
+            result[i] = fields.get(i);
         }
         return result;
     }

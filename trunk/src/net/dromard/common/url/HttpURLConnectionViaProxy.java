@@ -52,12 +52,12 @@ public class HttpURLConnectionViaProxy extends HttpURLConnection {
 	public void connect() throws IOException {
 		try {
 			super.connect();
-		} catch(java.net.UnknownHostException ex) {}
-		if(super.connected)
-			return;
-		http=new HttpClient(super.url, myProxyHost, myProxyPort);
-		ps=(PrintStream)http.getOutputStream();
-		super.connected=true;
+		} catch (java.net.UnknownHostException ex) {
+		}
+		if (super.connected) return;
+		http = new HttpClient(super.url, myProxyHost, myProxyPort);
+		ps = (PrintStream) http.getOutputStream();
+		super.connected = true;
 	}
 
 	/**
