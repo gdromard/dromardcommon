@@ -15,6 +15,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -54,6 +56,7 @@ public class JCustomBar extends JPanel {
     	remove(button);
     	buttons.remove(buttons.size()-1);
     	SwingUtilities.updateComponentTreeUI(this);
+    	button.fireRemoved();
     	return button;
     }
     
@@ -138,9 +141,12 @@ public class JCustomBar extends JPanel {
         panel.add(form, BorderLayout.CENTER);
         SwingHelper.openInFrame(panel, "JCustomBar demo");
     }
+
+    public abstract static class CustomBarButtonListener {
+    	public abstract void removed();
+    }
     
     /**
-     * 
      * @author Gabriel Dromard
      */
     public static class CustomBarButton extends JLabel implements MouseListener {
@@ -148,6 +154,7 @@ public class JCustomBar extends JPanel {
 		protected Action action;
 		protected JCustomBar parent;
 		protected Color hover;
+		protected List<CustomBarButtonListener> listeners = new ArrayList<CustomBarButtonListener>();
 		
 		public CustomBarButton(JCustomBar parent, final String name) {
     		super(name);
@@ -168,6 +175,12 @@ public class JCustomBar extends JPanel {
     		this.action = action;
     	}
     	
+		protected void fireRemoved() {
+			for (CustomBarButtonListener listener : listeners) {
+				listener.removed();
+			}
+		}
+		
     	@Override
     	protected void paintComponent(Graphics g) {
     		Graphics2D g2 = (Graphics2D) g.create();
