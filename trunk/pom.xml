@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>net.dromard.common</groupId>
+  <groupId>net.dromard</groupId>
   <artifactId>dromard.common</artifactId>
   <name>dromard.common</name>
   <version>1.9</version>
-  <url>http://maven.apache.org</url>
+  <url>http://code.google.com/p/dromardcommon</url>
   <build>
     <finalName>dromard.common</finalName>
     <plugins>
