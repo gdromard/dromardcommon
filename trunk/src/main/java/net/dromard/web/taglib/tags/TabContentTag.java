@@ -66,6 +66,14 @@ public class TabContentTag extends AbstractTemplateTag {
     }
 
     /**
+     * @param tabId the id to set
+     * @throws JspException In the case of an invalid value is given or template is not found.
+     */
+    public final void setTabName(final String tabName) throws JspException {
+        addParameter("tabName", tabName);
+    }
+
+    /**
      * @param selected the selected to set
      * @throws JspException In the case of an invalid value is given or template is not found.
      */

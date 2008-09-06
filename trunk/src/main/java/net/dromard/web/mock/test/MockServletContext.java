@@ -24,6 +24,12 @@ import javax.servlet.ServletException;
  */
 public class MockServletContext implements ServletContext {
 
+	private String rootPath;
+
+	public MockServletContext(final String root) {
+		this.rootPath = root;
+	}
+
     /**
      * This implementation concat 'web/' with the given resource and return its absolute path.
      * @param resource The resource on which to get informations
@@ -32,7 +38,7 @@ public class MockServletContext implements ServletContext {
      */
     public final String getRealPath(final String resource) {
         try {
-            return new File("web/" + resource).getAbsolutePath();
+            return new File(rootPath + resource).getAbsolutePath();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

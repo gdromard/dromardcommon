@@ -19,7 +19,7 @@ import net.dromard.common.templating.GString;
  */
 public final class TemplateTagHelper {
     /** The folder where templates are stored. */
-    private static final String TEMPLATE_ROOT_FOLDER = "/WEB-INF/taglib/templates/";
+    private static final String TEMPLATE_ROOT_FOLDER = "/src/main/java/net/dromard/web/taglib/tags/examples/templates/";
     /** The extention used for template properties. */
     private static final String TEMPLATE_PARAMETER_FILE_EXTENTION = ".properties";
     /**
@@ -51,6 +51,7 @@ public final class TemplateTagHelper {
             File templatePropertyFile = new File(pageContext.getServletContext().getRealPath(TEMPLATE_ROOT_FOLDER + templateName + TEMPLATE_PARAMETER_FILE_EXTENTION));
             // Load template properties using a dynamic property
             Properties properties = new Properties();
+            System.out.println(templatePropertyFile.getAbsolutePath());
             properties.load(new FileInputStream(templatePropertyFile));
             // Retreive the template value. (Note: it can be a file name)
             String templateValue = properties.getProperty(TEMPLATE_PROPERTY_KEY);

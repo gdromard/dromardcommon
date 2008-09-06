@@ -36,8 +36,8 @@ public class WordTokenizerTest extends TestCase {
      */
     public void testSplit() {
         assertEquals(1, WordTokenizer.split("1", "|").size());
-        assertEquals(2, WordTokenizer.countOccurence("1|", "|"));
-        assertEquals(2, WordTokenizer.split("1|", "|").size());
+        assertEquals(1, WordTokenizer.countOccurence("1|", "|"));
+        assertEquals(1, WordTokenizer.split("1|", "|").size());
         assertEquals(2, WordTokenizer.split("1|2", "|").size());
         assertEquals(3, WordTokenizer.split("1|2|3", "|").size());
         assertEquals(3, WordTokenizer.split("1||3", "|").size());

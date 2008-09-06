@@ -30,9 +30,9 @@ public class MockPageContext extends PageContext {
     /** Out. */
     private JspWriter out;
     /** Request. */
-    private HttpServletRequest request = new MockHttpServletRequest();
+    private HttpServletRequest request = new MockHttpServletRequest("/ctx");
     /** Servlet Context. */
-    private ServletContext servletContext = new MockServletContext();
+    private ServletContext servletContext = new MockServletContext(".");
 
     /**
      * Default constructor.

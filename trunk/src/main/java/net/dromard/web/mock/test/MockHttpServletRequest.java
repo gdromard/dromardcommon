@@ -37,11 +37,13 @@ public class MockHttpServletRequest implements HttpServletRequest, ServletReques
     /** Session. */
     private MockHttpSession session = new MockHttpSession();
     private String remoteUser;
+	private String contextPath;
 
     /**
      * Default constructor.
      */
-    public MockHttpServletRequest() {
+    public MockHttpServletRequest(final String contextPath) {
+    	this.contextPath = contextPath;
     }
 
     /**
@@ -49,7 +51,7 @@ public class MockHttpServletRequest implements HttpServletRequest, ServletReques
      * @see javax.servlet.http.HttpServletRequestWrapper#getServletPath()
      */
     public final String getContextPath() {
-        return "/design2x";
+        return contextPath;
     }
 
     /**
