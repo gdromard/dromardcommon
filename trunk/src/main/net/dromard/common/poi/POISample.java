@@ -7,11 +7,9 @@ import java.awt.Color;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.apache.poi.hssf.usermodel.EscherGraphics;
 import org.apache.poi.hssf.usermodel.EscherGraphics2d;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -218,12 +216,11 @@ public class POISample {
             }
         }
     }
-
+/*
     public static void doTextExtration() throws IOException {
-        /*Text Extraction
+        //Text Extraction
 
-        For most text extraction requirements, the standard ExcelExtractor class should provide all you need.
-        */
+        //For most text extraction requirements, the standard ExcelExtractor class should provide all you need.
 
         InputStream inp = new FileInputStream("workbook.xls");
         HSSFWorkbook wb = new HSSFWorkbook(new POIFSFileSystem(inp));
@@ -233,7 +230,7 @@ public class POISample {
         extractor.setIncludeSheetNames(false);
         String text = extractor.getText();
     }
-
+/**/
     public static void handleFillsAndColors() throws IOException {
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("new sheet");

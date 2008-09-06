@@ -297,7 +297,7 @@ public final class POIHelper {
         destinationStyle.setFillBackgroundColor(sourceStyle.getFillBackgroundColor());
         destinationStyle.setFillForegroundColor(sourceStyle.getFillForegroundColor());
         destinationStyle.setFillPattern(sourceStyle.getFillPattern());
-        destinationStyle.setFont(sourceStyle.getFont(parentWorkbook));
+        destinationStyle.setFont(parentWorkbook.getFontAt(sourceStyle.getFontIndex()));
         destinationStyle.setHidden(sourceStyle.getHidden());
         destinationStyle.setIndention(sourceStyle.getIndention());
         destinationStyle.setLocked(sourceStyle.getLocked());
