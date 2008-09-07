@@ -30,7 +30,7 @@ public class HttpURLConnectionViaProxy extends HttpURLConnection {
 	 */
 	public HttpURLConnectionViaProxy(URL url, String proxyHost, int proxyPort) throws IOException {
 		super(url, proxyHost, proxyPort);
-		if(proxyHost != null) {
+		if (proxyHost != null) {
 			myProxyHost=proxyHost;
 			myProxyPort=proxyPort;
 		}
@@ -53,6 +53,7 @@ public class HttpURLConnectionViaProxy extends HttpURLConnection {
 		try {
 			super.connect();
 		} catch (java.net.UnknownHostException ex) {
+			ex.printStackTrace();
 		}
 		if (super.connected) return;
 		http = new HttpClient(super.url, myProxyHost, myProxyPort);

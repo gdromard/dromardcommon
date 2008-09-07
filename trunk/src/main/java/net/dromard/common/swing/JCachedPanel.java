@@ -43,16 +43,16 @@ public class JCachedPanel extends JPanel {
      */
     @Override
     protected void paintChildren(Graphics g) {
-        System.err.println("[DEBUG] painting childrens ... "+(isCacheDirty()?"Refreching cache":"Using cache"));
         if (isCacheDirty()) {
+        	System.err.println("[DEBUG] painting childrens ... Refreching cache");
             createCache();
-
-        // paints children in the cache
-        Graphics2D g2 = buffer.createGraphics();
-        copySettings(g, g2);
-        clearCache(g2);
-        super.paintChildren(g2);
-        g2.dispose();
+	
+	        // paints children in the cache
+	        Graphics2D g2 = buffer.createGraphics();
+	        copySettings(g, g2);
+	        clearCache(g2);
+	        super.paintChildren(g2);
+	        g2.dispose();
         }
 
         // draws cache on screen

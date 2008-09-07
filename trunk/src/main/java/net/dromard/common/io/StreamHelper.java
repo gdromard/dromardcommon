@@ -24,7 +24,7 @@ public final class StreamHelper {
      * This static method copy the input stream into the output stream.
      * @param in The InputStream, where to read data
      * @param out The Output stream, where to write data
-     * @throws IOException Occured if you did a mistake in the given parameters ...
+     * @throws IOException Occurred if you did a mistake in the given parameters ...
      */
     public static void streamCopier(final InputStream in, final OutputStream out) throws IOException {
         int len;
@@ -32,6 +32,8 @@ public final class StreamHelper {
         while ((len = in.read(b)) != -1) {
             out.write(b, 0, len);
         }
+        in.close();
+        out.close();
     }
 
     /**
@@ -48,6 +50,7 @@ public final class StreamHelper {
         while ((len = in.read(b)) != -1) {
             content.append(new String(b, 0, len, encoding));
         }
+        in.close();
         return content.toString();
     }
 
@@ -65,6 +68,7 @@ public final class StreamHelper {
         while ((len = in.read(b)) != -1) {
             content.append(new String(b, 0, len));
         }
+        in.close();
         return content.toString();
     }
 }
