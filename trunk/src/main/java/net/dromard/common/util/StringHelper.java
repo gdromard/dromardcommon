@@ -1,6 +1,7 @@
 package net.dromard.common.util;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -334,6 +335,29 @@ public final class StringHelper {
     }
 
     /**
+     * @param array array to merge into a string.
+     * @param delimiter delimiter to place between two items of the array. if <code>null</code> no delimiter is used.
+     * @return a string representation of the array.
+     */
+    public static String join(final List<String> list, final String delimiter) {
+        if (list == null) {
+            return null;
+        }
+
+        StringBuffer joined = new StringBuffer("");
+        if (list.size() > 0) { // has at least one element.
+            joined.append(list.get(0));
+            for (int i = 1; i < list.size(); i++) {
+                if (delimiter != null) {
+                    joined.append(delimiter);
+                }
+                joined.append(list.get(i));
+            }
+        }
+        return joined.toString();
+    }
+
+    /**
      * This function replace all 'fields' by its corresponding 'values' in the source string.
      * @param source Source String.
      * @param fields Fields to be replaced.
@@ -541,18 +565,10 @@ public final class StringHelper {
      * @param array     The array to convert
      * @param separator The string separator to be used for conversion.
      * @return the coverage
+     * @deprecated use {@link #join(Object[], String)}
      */
     public static String arrayToString(final Object[] array, final String separator) {
-        String res = "";
-        for (int i = 0; i < array.length; i++) {
-            // Concat each element
-            res += array[i];
-            // Add separator if necessary
-            if ((i < array.length - 1)) {
-                res += separator;
-            }
-        }
-        return res;
+    	return join(array, separator);
     }
 
     /**

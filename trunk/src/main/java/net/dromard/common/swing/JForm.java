@@ -77,16 +77,16 @@ public class JForm extends JPanel {
         if(middle != null) {
             line.add(middle, BorderLayout.CENTER);
         }
-		lastLine.add(line, BorderLayout.NORTH);
+		getLastLine().add(line, BorderLayout.NORTH);
 		JPanel nextLine = buildPanel();
-		lastLine.add(nextLine, BorderLayout.CENTER);
+		getLastLine().add(nextLine, BorderLayout.CENTER);
 		lastLine = nextLine;
 	}
 
 
     /**
-     * This methods is used to set width of left or rigth component. All the component on left must have the same width !
-     * And it is the same for rigth ones.
+     * This methods is used to set width of left or right component. All the component on left must have the same width !
+     * And it is the same for right ones.
      * 
      * @param components The ArrayList of components.
      * @param component The component to add into the ArrayList.
@@ -123,7 +123,11 @@ public class JForm extends JPanel {
         }
     }
 
-    /**
+	public JPanel getLastLine() {
+		return lastLine;
+	}
+
+	/**
      * This is a way of testing this class.
      * 
      * @param args Not used.

@@ -144,26 +144,24 @@ public final class FileHelper {
 	 * 
 	 * @param source      The source File object
 	 * @param destination The destination File object
-	 * @param true if the copy succeed
+	 * @throws IOException 
 	 */
-    public static boolean copy(File source, File destination) {
+    public static void copy(File source, File destination) throws IOException {
+    	FileChannel srcChannel = null;
+    	FileChannel dstChannel = null;
     	try {
-            // Create channel on the source
-            FileChannel srcChannel = new FileInputStream(source).getChannel();
-        
-            // Create channel on the destination
-            FileChannel dstChannel = new FileOutputStream(destination).getChannel();
-        
-            // Copy file contents from source to destination
-            dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
-        
-            // Close the channels
-            srcChannel.close();
-            dstChannel.close();
-            return true;
-        } catch (IOException e) {
-        	e.printStackTrace();
-        	return false;
-        }
+	        // Create channel on the source
+			srcChannel = new FileInputStream(source).getChannel();
+	    
+	        // Create channel on the destination
+			dstChannel = new FileOutputStream(destination).getChannel();
+	    
+	        // Copy file contents from source to destination
+	        dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
+    	} finally {
+    		// Close the channels
+    		if (srcChannel != null) srcChannel.close();
+    		if (dstChannel != null) dstChannel.close();
+    	}
     }
 }
