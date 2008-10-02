@@ -52,21 +52,28 @@ public class JCustomBar extends JPanel {
     
     public JComponent removeButton() {
     	System.out.println("remove "+(buttons.size()-1));
-    	CustomBarButton button = buttons.get(buttons.size()-1);
-    	remove(button);
-    	buttons.remove(buttons.size()-1);
-    	SwingUtilities.updateComponentTreeUI(this);
-    	button.fireRemoved();
-    	return button;
+    	if (buttons.size() > 0) {
+	    	CustomBarButton button = buttons.get(buttons.size()-1);
+	    	remove(button);
+	    	buttons.remove(buttons.size()-1);
+	    	SwingUtilities.updateComponentTreeUI(this);
+	    	button.fireRemoved();
+	    	return button;
+    	}
+    	return null;
     }
     
     public JComponent removeButtonsAfterMe(JComponent button) {
-    	return removeButtons(buttons.lastIndexOf(button)+1);
+    	return removeButtons(indexOf(button)+1);
     }
     
     public JComponent removeButtonsIncludingMe(JComponent button) {
-    	return removeButtons(buttons.lastIndexOf(button));
+    	return removeButtons(indexOf(button));
     }
+
+	public int indexOf(final JComponent button) {
+		return buttons.lastIndexOf(button);
+	}
     
     public JComponent removeButtons(int index) {
     	JComponent button = null;
@@ -161,7 +168,7 @@ public class JCustomBar extends JPanel {
     		this.parent = parent;
     		setBackground(parent.getBackground());
     		setForeground(parent.getForeground());
-    		setFont(parent.getFont().deriveFont(Font.BOLD, 20));
+    		setFont(parent.getFont());
     		setPreferredSize(new Dimension(SwingHelper.getUIStringWidth(this, name, getFont())+15, 30));
     		addMouseListener(this);
 			int blue  = (getForeground().getBlue()  + getBackground().getBlue())/2;
@@ -195,7 +202,7 @@ public class JCustomBar extends JPanel {
     		int height = getHeight() - insets.top - insets.bottom;
     		
     		g2.setColor(getForeground());
-    		g2.setFont(getFont().deriveFont(Font.BOLD, height / 1.8f));
+    		g2.setFont(getFont());
     		g2.drawString(getText(), x + 5, y + (height / 2) + g2.getFontMetrics().getAscent() / 3);
     		
     		Color color = getParent().getBackground();
@@ -242,7 +249,7 @@ public class JCustomBar extends JPanel {
     		super(name);
     		setBackground(Color.BLACK);
     		setForeground(Color.WHITE);
-    		setFont(getFont().deriveFont(Font.BOLD, 20));
+    		setFont(getFont());
     	}
     	
     	@Override

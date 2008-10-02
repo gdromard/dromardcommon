@@ -48,6 +48,17 @@ public class JForm extends JPanel {
 	}
 
 	/**
+	 * Create a form by adding a line
+	 * @param left  The label (WEST)
+	 * @param middle A component (middle)
+	 * @param right  A component (EAST)
+	 */
+	public JForm(JComponent left, JComponent middle, JComponent right) {
+		this();
+		addLine(left, middle, right);
+	}
+
+	/**
 	 * Centralize creation of panels
 	 * @return A new instance of panel (with border layout and opaque false)
 	 */
@@ -64,29 +75,95 @@ public class JForm extends JPanel {
 	 * @param middle A component (middle)
 	 * @param right  A component (EAST)
 	 */
-	public void addLine(JComponent left, JComponent middle, JComponent right) {
-		JPanel line = buildPanel();
-        if(left != null) {
-            leftWidth = addComponent(leftComponents, left, leftWidth);
-            line.add(left, BorderLayout.WEST);
-        }
-        if(right != null) {
-            rightWidth = addComponent(rightComponents, right, rightWidth);
-            line.add(right, BorderLayout.EAST);
-        }
-        if(middle != null) {
-            line.add(middle, BorderLayout.CENTER);
-        }
-		getLastLine().add(line, BorderLayout.NORTH);
-		JPanel nextLine = buildPanel();
-		getLastLine().add(nextLine, BorderLayout.CENTER);
-		lastLine = nextLine;
+	public JLine addLine(JComponent left, JComponent middle, JComponent right) {
+		return addLine(left, middle, right, false);
 	}
 
+	/**
+	 * Add a line to the form
+	 * @param left  The label (WEST)
+	 * @param middle A component (middle)
+	 * @param right  A component (EAST)
+	 */
+	public JLine addLine(JComponent left, JComponent middle, JComponent right, boolean center) {
+		JLine line = new JLine(left, middle, right);
+		if (!center) {
+			lastLine.add(line, BorderLayout.NORTH);
+			JPanel nextLine = buildPanel();
+			lastLine.add(nextLine, BorderLayout.CENTER);
+			lastLine = nextLine;
+		} else {
+			lastLine.add(line, BorderLayout.CENTER);
+			JPanel nextLine = buildPanel();
+			lastLine.add(nextLine, BorderLayout.SOUTH);
+			lastLine = nextLine;
+		}
+		return line;
+	}
+
+	public class JLine extends JPanel {
+		private JComponent left;
+		private JComponent middle;
+		private JComponent right;
+		public JLine() {
+			super(new BorderLayout(hgap, vgap));
+			setOpaque(this.isOpaque());
+			setBackground(this.getBackground());
+		}
+		public JLine(final JComponent left, final JComponent middle, final JComponent right) {
+			this();
+			addLeftComponent(left);
+			addRightComponent(right);
+			addMiddleComponent(middle);
+		}
+		private void addLeftComponent(final JComponent left) {
+	        if(left != null) {
+	        	if (this.left != null) {
+	        		rightWidth = replaceComponent(leftComponents, this.left, left, leftWidth);
+	        	} else {
+	        		leftWidth = addComponent(leftComponents, left, leftWidth);
+	        	}
+	            add(left, BorderLayout.WEST);
+				this.left = left;
+	        }
+		}
+		private void addRightComponent(final JComponent right) {
+	        if(right != null) {
+	        	if (this.right != null) {
+	        		rightWidth = replaceComponent(rightComponents, this.right, right, rightWidth);
+	        	} else {
+	        		rightWidth = addComponent(rightComponents, right, rightWidth);
+	        	}
+	            add(right, BorderLayout.EAST);
+				this.right = right;
+	        }
+		}
+		private void addMiddleComponent(final JComponent middle) {
+	        if(middle != null) {
+	        	if (this.middle != null) remove(this.middle);
+	        	add(middle, BorderLayout.CENTER);
+				this.middle = middle;
+	        }
+		}
+	}
 
     /**
-     * This methods is used to set width of left or right component. All the component on left must have the same width !
-     * And it is the same for right ones.
+     * This methods is used to set width of left or rigth component. All the component on left must have the same width !
+     * And it is the same for rigth ones.
+     * 
+     * @param components The ArrayList of components.
+     * @param component The component to add into the ArrayList.
+     * @param maxSize The current max size of the components.
+     * @return The new max size of the components
+     */
+	private int replaceComponent(final ArrayList<JComponent> components, final JComponent oldComponent, final JComponent newComponent, final int maxSize) {
+		components.remove(oldComponent);
+		return addComponent(components, newComponent, maxSize);
+	}
+
+    /**
+     * This methods is used to set width of left or rigth component. All the component on left must have the same width !
+     * And it is the same for rigth ones.
      * 
      * @param components The ArrayList of components.
      * @param component The component to add into the ArrayList.
@@ -102,7 +179,6 @@ public class JForm extends JPanel {
         } else {
         	component.setPreferredSize(new Dimension(maxSize, (int)component.getPreferredSize().getHeight()));
         }
-
 		components.add(component);
 
 		return maxSize;
@@ -115,12 +191,26 @@ public class JForm extends JPanel {
      * @param size The new prefered size.
      */
     private void adaptWidth(ArrayList<JComponent> components, int size) {
-    	JComponent cmp;
-        // Set preferred size for left components
-        for (int i=0; i<components.size(); i++) {
-            cmp = components.get(i);
-            cmp.setPreferredSize(new Dimension(size, (int)cmp.getPreferredSize().getHeight()));
+    	for (JComponent cmp : components) {
+			cmp.setPreferredSize(new Dimension(size, (int)cmp.getPreferredSize().getHeight()));
         }
+    }
+
+    public void refreshWidth() {
+    	double leftWidth = 0;
+    	for (JComponent cmp : leftComponents) {
+			cmp.setPreferredSize(null);
+			leftWidth = Math.max(cmp.getPreferredSize().getWidth(), leftWidth);
+        }
+    	double rightWidth = 0;
+    	for (JComponent cmp : rightComponents) {
+			cmp.setPreferredSize(null);
+			rightWidth = Math.max(cmp.getPreferredSize().getWidth(), rightWidth);
+        }
+    	this.leftWidth = (int) leftWidth;
+    	adaptWidth(leftComponents, this.leftWidth);
+    	this.rightWidth = (int) rightWidth;
+    	adaptWidth(rightComponents, this.rightWidth);
     }
 
 	public JPanel getLastLine() {

@@ -4,6 +4,7 @@
  */
 package net.dromard.common.swing;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -78,5 +79,15 @@ public class JImage extends JPanel implements ImageObserver {
 	 */
 	public void setImage(Image image) {
 		this.image = image;
+	}
+
+	/**
+	 * @return the image original dimension.
+	 */
+	public Dimension getImageSize() {
+		if (image != null) {
+			return new Dimension(image.getWidth(this), image.getHeight(this));
+		}
+		return null;
 	}
 }

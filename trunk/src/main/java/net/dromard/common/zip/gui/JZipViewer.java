@@ -25,7 +25,7 @@ public class JZipViewer extends JTree {
 	}
 	
 	public static final void main(String[] args) throws IOException {
-		String zipfile = "C:/Documents and Settings/45505230/Mes documents/NDTKit/Cartos/Zip CFF-CSC.zip";
+		String zipfile = args[0];
 		JTree tree = new JZipViewer(zipfile, new TreeSelectionHandler() {
 			@Override
 			public void select(List<ZipNode> selectedZipEntries) {

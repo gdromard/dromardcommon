@@ -23,6 +23,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 public class InfiniteProgressPanel extends JComponent implements MouseListener {
+	private static final long serialVersionUID = -1637561204916241818L;
 	protected Area[] ticker = null;
 	protected Thread animation = null;
 	protected boolean started = false;
@@ -69,7 +70,10 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
 
 	public double getPrimitiveWidth() {
 		if (primitiveWidth <= 0) {
-			primitiveWidth = Math.min((double) getParent().getWidth(), (double) getParent().getHeight()) / 16;
+			primitiveWidth = Math.min((double) getWidth() / 16, (double) getHeight()) / 16;
+			if (primitiveWidth <= 0) {
+				primitiveWidth = 30/16;
+			}
 		}
 		return primitiveWidth;
 	}
@@ -141,6 +145,7 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
 			}
 
 			if (text != null && text.length() > 0) {
+				g2.setFont(getFont());
 				FontRenderContext context = g2.getFontRenderContext();
 				TextLayout layout = new TextLayout(text, getFont(), context);
 				Rectangle2D bounds = layout.getBounds();
@@ -151,8 +156,11 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
 	}
 
 	private Area[] buildTicker() {
+		if (getWidth() <= 1) {
+			setSize(getParent().getSize());
+		}
 		Area[] ticker = new Area[barsCount];
-		Point2D.Double center = new Point2D.Double((double) getParent().getWidth() / 2, (double) getParent().getHeight() / 2);
+		Point2D.Double center = new Point2D.Double((double) getWidth() / 2, (double) getHeight() / 2);
 		double fixedAngle = 2.0 * Math.PI / ((double) barsCount);
 
 		for (double i = 0.0; i < (double) barsCount; i++) {
@@ -195,8 +203,7 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
 		}
 
 		public void run() {
-			if (getParent() == null) return;
-			Point2D.Double center = new Point2D.Double((double) getParent().getWidth() / 2, (double) getParent().getHeight() / 2);
+			Point2D.Double center = new Point2D.Double((double) getWidth() / 2, (double) getHeight() / 2);
 			double fixedIncrement = 2.0 * Math.PI / ((double) barsCount);
 			AffineTransform toCircle = AffineTransform.getRotateInstance(fixedIncrement, center.getX(), center.getY());
 
@@ -264,7 +271,6 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
 	}
 	
 	public static void main(String[] args) {
-		/**/
 		final JFrame demo = new JFrame("Infinite Progress Panel Demo");
 		demo.getContentPane().setLayout(new FlowLayout());
 		demo.setSize(new Dimension(300, 300));
