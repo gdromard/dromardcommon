@@ -12,8 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipException;
 
-import net.dromard.common.util.TimeWatch;
-
 public class ZipReader {
 	private File zipFile;
 	private ZipInputStream inputStream;
@@ -38,7 +36,6 @@ public class ZipReader {
 		ZipEntry entry = null;
 		while ((entry = inputStream.getNextEntry()) != null) {
 			reader.read(inputStream, entry.getName());
-			inputStream.closeEntry();
 		}
 		close();
 	}
@@ -73,7 +70,7 @@ public class ZipReader {
 		opened = true;
 	}
 
-	private void close() throws IOException {
+	public void close() throws IOException {
 		if (opened) {
 			opened = false;
 			inputStream.close();
@@ -105,8 +102,8 @@ public class ZipReader {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		String zipPath = "C:/Documents and Settings/45505230/Mes documents/NDTKit/Cartos/M2K - M2M - Multi2000/étalon-test-pasdif2.m2k.zip";
-		extract(zipPath, "temp", "*/M2kConfig.xml");
+		String zipPath = "test.zip";
+		extract(zipPath, "temp");
 		//showZipContent(zipPath);
 	}
 
@@ -129,7 +126,7 @@ public class ZipReader {
 		@Override
 		public void read(InputStream input, String name) {
 			try {
-				if (entries == null) {
+				if (entries == null || entries.size() == 0) {
 					extractTo(target + File.separator + name, input);
 					System.out.println(name + " extracted");
 				} else {
