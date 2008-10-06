@@ -2,7 +2,6 @@ package net.dromard.web.taglib;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
@@ -10,10 +9,9 @@ import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 import javax.servlet.jsp.tagext.Tag;
 
+import net.dromard.common.util.StringHelper;
 import net.dromard.web.taglib.exception.InvalidAttributeValueTagException;
 import net.dromard.web.taglib.exception.TemplateNotFoundTagException;
-
-import net.dromard.common.util.StringHelper;
 
 /**
  * Abstract Tag class.

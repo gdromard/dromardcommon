@@ -3,15 +3,25 @@
  */
 package net.dromard.common.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 
 /**
  * Utility class for reflect purpose.
@@ -62,7 +72,7 @@ public final class ReflectHelper {
 
     /**
      * Instantiate a Class using its name.
-     * @param className The class name.
+     * @param clazz The class to be instantiated
      * @param arguments The arguments to be passed to constructor.
      * @param types The types of arguments.
      * @return The instance
@@ -72,12 +82,9 @@ public final class ReflectHelper {
      * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      * @throws InstantiationException Any other case
      */
-    public static Object newInstance(final String className, final Object[] arguments, final Class[] types) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-        // Retrieve class to be load
-        Class clazz = Class.forName(className);
-
+    public static Object newInstance(final Class<?> clazz, final Object[] arguments, final Class[] types) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
         // Retrieving corresponding constructor
-        Constructor constructor = clazz.getConstructor(types);
+        Constructor<?> constructor = clazz.getConstructor(types);
 
         // Create an instance
         return constructor.newInstance(arguments);
@@ -85,7 +92,7 @@ public final class ReflectHelper {
 
     /**
      * Instantiate a Class using its name.
-     * @param className The class name.
+     * @param clazz The class to be instantiated
      * @param arguments The parameters to be passed to constructor.
      * @return The instance
      * @throws ClassNotFoundException Thrown if you try to instantiate a class that does not exist.
@@ -94,14 +101,14 @@ public final class ReflectHelper {
      * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      * @throws InstantiationException Any other case
      */
-    public static Object newInstance(final String className, final Object[] arguments) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
+    public static Object newInstance(final Class<?> clazz, final Object[] arguments) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
         // Construct the types array
-        Class[] types = new Class[arguments.length];
-        for (int i = 0; i <= arguments.length; ++i) {
+        Class<?>[] types = new Class[arguments.length];
+        for (int i = 0; i < arguments.length; ++i) {
             types[i] = arguments[i].getClass();
         }
         // Instantiate class
-        return newInstance(className, arguments, types);
+        return newInstance(clazz, arguments, types);
     }
 
     /**
@@ -115,7 +122,23 @@ public final class ReflectHelper {
      * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object newInstance(final String className) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-        return newInstance(className, new Object[] {});
+        // Retrieve class to be load
+        Class<?> clazz = Class.forName(className);
+        return newInstance(clazz, new Object[] {});
+    }
+
+    /**
+     * Instantiate a Class using its name.
+     * @param clazz The class to be instantiated
+     * @return The instance
+     * @throws ClassNotFoundException Thrown if you try to instantiate a class that does not exist.
+     * @throws InstantiationException Any other case
+     * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
+     * @throws InvocationTargetException Can occur during invocation
+     * @throws IllegalAccessException Thrown when an illegal access of the instance is done
+     */
+    public static Object newInstance(final Class clazz) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
+        return newInstance(clazz, new Object[] {});
     }
 
     /**
@@ -599,4 +622,83 @@ public final class ReflectHelper {
 
         return ("" + method.getName().charAt(prefix.length())).toLowerCase() + method.getName().substring(prefix.length() + 1);
     }
+
+    public static boolean implement(Class<?> clazz, Class<?> father) {
+    	return Arrays.asList(clazz.getInterfaces()).contains(father);
+    }
+
+    /**
+     * Retrieve the class list of a package.
+     * @param packageName The package name
+     * @return The list of classes.
+     * @throws ClassNotFoundException No comment !!
+     * @throws IOException 
+     */
+	public static Set<Class<?>> getClasses(String packageName) throws IOException, ClassNotFoundException {
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		return getClasses(loader, packageName);
+	}
+
+	private static Set<Class<?>> getClasses(ClassLoader loader, String packageName) throws IOException, ClassNotFoundException {
+		Set<Class<?>> classes = new HashSet<Class<?>>();
+		String path = packageName.replace('.', '/');
+		Enumeration<URL> resources = loader.getResources(path);
+		if (resources != null) {
+			while (resources.hasMoreElements()) {
+				String filePath = resources.nextElement().getFile();
+				// WINDOWS HACK
+				if (filePath.indexOf("%20") > 0)
+					filePath = filePath.replaceAll("%20", " ");
+				if (filePath != null) {
+					if ((filePath.indexOf("!") > 0) & (filePath.indexOf(".jar") > 0)) {
+						String jarPath = filePath.substring(0, filePath.indexOf("!")).substring(filePath.indexOf(":") + 1);
+						// WINDOWS HACK
+						if (jarPath.indexOf(":") >= 0)
+							jarPath = jarPath.substring(1);
+						classes.addAll(getFromJARFile(jarPath, path));
+					} else {
+						classes.addAll(getFromDirectory(new File(filePath), packageName));
+
+					}
+				}
+			}
+		}
+		return classes;
+	}
+
+	private static Set<Class<?>> getFromDirectory(File directory, String packageName) throws ClassNotFoundException {
+		Set<Class<?>> classes = new HashSet<Class<?>>();
+		if (directory.exists()) {
+			for (String file : directory.list()) {
+				if (file.endsWith(".class")) {
+					String name = packageName + '.' + stripFilenameExtension(file);
+					Class<?> clazz = Class.forName(name);
+					classes.add(clazz);
+				}
+			}
+		}
+		return classes;
+	}
+
+	private static String stripFilenameExtension(String file) {
+		return file.substring(0, file.lastIndexOf('.'));
+	}
+
+	private static Set<Class<?>> getFromJARFile(String jar, String packageName) throws FileNotFoundException, IOException, ClassNotFoundException {
+		Set<Class<?>> classes = new HashSet<Class<?>>();
+		JarInputStream jarFile = new JarInputStream(new FileInputStream(jar));
+		JarEntry jarEntry;
+		do {
+			jarEntry = jarFile.getNextJarEntry();
+			if (jarEntry != null) {
+				String className = jarEntry.getName();
+				if (className.endsWith(".class")) {
+					className = stripFilenameExtension(className);
+					if (className.startsWith(packageName))
+						classes.add(Class.forName(className.replace('/', '.')));
+				}
+			}
+		} while (jarEntry != null);
+		return classes;
+	}
 }
