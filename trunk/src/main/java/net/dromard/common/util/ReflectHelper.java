@@ -651,10 +651,7 @@ public final class ReflectHelper {
 					filePath = filePath.replaceAll("%20", " ");
 				if (filePath != null) {
 					if ((filePath.indexOf("!") > 0) & (filePath.indexOf(".jar") > 0)) {
-						String jarPath = filePath.substring(0, filePath.indexOf("!")).substring(filePath.indexOf(":") + 1);
-						// WINDOWS HACK
-						if (jarPath.indexOf(":") >= 0)
-							jarPath = jarPath.substring(1);
+						String jarPath = filePath.substring(0, filePath.indexOf("!"));
 						classes.addAll(getFromJARFile(jarPath, path));
 					} else {
 						classes.addAll(getFromDirectory(new File(filePath), packageName));
@@ -684,9 +681,9 @@ public final class ReflectHelper {
 		return file.substring(0, file.lastIndexOf('.'));
 	}
 
-	private static Set<Class<?>> getFromJARFile(String jar, String packageName) throws FileNotFoundException, IOException, ClassNotFoundException {
+	private static Set<Class<?>> getFromJARFile(String jarUrl, String packageName) throws FileNotFoundException, IOException, ClassNotFoundException {
 		Set<Class<?>> classes = new HashSet<Class<?>>();
-		JarInputStream jarFile = new JarInputStream(new FileInputStream(jar));
+		JarInputStream jarFile = new JarInputStream(new URL(jarUrl).openStream());
 		JarEntry jarEntry;
 		do {
 			jarEntry = jarFile.getNextJarEntry();
