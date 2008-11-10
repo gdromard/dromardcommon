@@ -179,4 +179,9 @@ public class Item {
 		buf.append(tabs).append("</").append(ITEM).append(">\n");
 		return buf.toString();
 	}
+
+
+	public Enclosure getEnclosure() {
+		return enclosure;
+	}
 }
