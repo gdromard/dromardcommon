@@ -20,15 +20,6 @@ import org.xml.sax.SAXException;
 
 public class RSSAtomReader extends RSSReader {
 
-	private static RSSAtomReader instance = null;
-	private RSSAtomReader() {}
-	public static RSSAtomReader getInstance() {
-		if (instance == null) {
-			instance = new RSSAtomReader();
-		}
-		return instance;
-	}
-
 	public Atom load(final URL url) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		Document doc = builder.parse(url.openStream());
@@ -82,10 +73,10 @@ public class RSSAtomReader extends RSSReader {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		RSSAtomReader reader = RSSAtomReader.getInstance();
+		RSSAtomReader reader = new RSSAtomReader();
 		//URL u = new File("C:/Projects/picasamoviecollection/src/main/resources/curiouscreature.xml").toURI().toURL();
-		URL u = new File("C:/Projects/picasamoviecollection/src/main/resources/albums.xml").toURI().toURL();
-		//URL u = new URL("http://www.curious-creature.org/feed/atom/");
+		//URL u = new File("C:/Projects/picasamoviecollection/src/main/resources/albums.xml").toURI().toURL();
+		URL u = new URL("http://picasaweb.google.fr/data/feed/base/user/laurentetsylvie75/albumid/5264008816855671777?alt=rss&kind=photo&authkey=OJ0rnRRHaLA&hl=fr");
 		Atom atom = reader.load(u);
 		System.out.println(atom.toXML());
 	}
