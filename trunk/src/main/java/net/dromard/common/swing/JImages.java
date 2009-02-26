@@ -20,7 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
-import net.dromard.common.io.FileExtentionFilter;
+import net.dromard.common.io.FileExtensionFilter;
 
 public class JImages extends JPanel implements Runnable {
 	private static final long serialVersionUID = 7573856786476856873L;
@@ -28,11 +28,11 @@ public class JImages extends JPanel implements Runnable {
     
     public JImages(File folder) {
         super(new CellFlowLayout(10, 10));
-        FileExtentionFilter filter = new FileExtentionFilter();
-        filter.addExtention("gif");
-        filter.addExtention("jpg");
-        filter.addExtention("png");
-        filter.addExtention("jpeg");
+        FileExtensionFilter filter = new FileExtensionFilter();
+        filter.addExtension("gif");
+        filter.addExtension("jpg");
+        filter.addExtension("png");
+        filter.addExtension("jpeg");
         File[] files = folder.listFiles(filter);
         // Prepare thumbnails
         for(int i=0; i<files.length; ++i) {

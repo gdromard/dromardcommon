@@ -157,7 +157,7 @@ public final class FileHelper {
 			dstChannel = new FileOutputStream(destination).getChannel();
 	    
 	        // Copy file contents from source to destination
-	        dstChannel.transferFrom(srcChannel, 0, srcChannel.size());
+			srcChannel.transferTo(0, srcChannel.size(), dstChannel);
     	} finally {
     		// Close the channels
     		if (srcChannel != null) srcChannel.close();

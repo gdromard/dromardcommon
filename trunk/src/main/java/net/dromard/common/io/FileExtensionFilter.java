@@ -8,48 +8,47 @@ import java.util.List;
 
 /**
  * This Class is an implementation of FilenameFilter interface.
- * 
- * <br/>
- * 
- * <pre>
- *     +---------+
- *     | History |
- *     +---------+
- * 
- *   [14 mai 07] by Gabriel Dromard
- *      - Creation.
- * </pre>
- * 
  * <br/>
  * @author Gabriel Dromard
  */
-public class FileExtentionFilter implements FilenameFilter {
-    /** Possible extensions. The filtered extentsions. */
+public class FileExtensionFilter implements FilenameFilter {
+    /** Possible extensions. The filtered extensions. */
     List<String> possibleExt;
 
+
     /**
-     * Construct an instance of FileExtentionFilter with a set of extension to filter.
+     * Construct an instance of FileExtensionFilter with an empty set of extension to filter.
+     * You have to use the addExtension() method.
+     * @see #addExtension(String)
+     */
+    public FileExtensionFilter() {
+        possibleExt = new ArrayList<String>();
+    }
+    
+    /**
+     * Construct an instance of FileExtensionFilter with a set of extension to filter.
      * @param extensions The extensions list. (Without the dot character)
      */
-    public FileExtentionFilter(List<String> extensions) {
-        possibleExt = extensions;
+    public FileExtensionFilter(String... extensions) {
+    	this();
+    	for (String extension: extensions) {
+    		addExtension(extension);
+    	}
     }
-
-
+    
     /**
-     * Construct an instance of FileExtentionFilter with an empty set of extension to filter.
-     * You have to use the addExtention() method.
-     * @see #addExtention(String)
+     * Construct an instance of FileExtensionFilter with a set of extension to filter.
+     * @param extensions The extensions list. (Without the dot character)
      */
-    public FileExtentionFilter() {
-        possibleExt = new ArrayList<String>();
+    public FileExtensionFilter(List<String> extensions) {
+    	possibleExt = extensions;
     }
     
     /**
      * Add an extension to the filter instance.
      * @param extension The extension to be added to the filter.
      */
-    public void addExtention(String extension) {
+    public void addExtension(String extension) {
         possibleExt.add(extension);
     }
 
