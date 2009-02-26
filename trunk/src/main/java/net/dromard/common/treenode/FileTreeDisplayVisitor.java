@@ -26,7 +26,7 @@ public class FileTreeDisplayVisitor implements Visitor {
         }
         System.out.println(((FileTreeNode) node).getFile().getName());
 
-        for (Iterator i = ((FileTreeNode) node).getChilds().iterator(); i.hasNext();) {
+        for (Iterator i = ((FileTreeNode) node).getChild().iterator(); i.hasNext();) {
         	FileTreeNode childNode = (FileTreeNode) (i.next());
             childNode.accept(this);
         }

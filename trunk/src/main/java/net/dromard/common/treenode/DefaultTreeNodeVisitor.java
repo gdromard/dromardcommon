@@ -22,8 +22,10 @@ public abstract class DefaultTreeNodeVisitor implements Visitor {
             throw new ClassCastException("TreeNode expected");
         }
 
-        for (Iterator i = ((TreeNode) node).getChilds().iterator(); i.hasNext();) {
-            ((TreeNode) i.next()).accept(this);
+        if (((TreeNode) node).getChild() != null) {
+	        for (Iterator<TreeNode> i = ((TreeNode) node).getChild().iterator(); i.hasNext();) {
+	            i.next().accept(this);
+	        }
         }
     }
 }

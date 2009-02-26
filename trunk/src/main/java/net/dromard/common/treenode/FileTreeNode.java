@@ -1,72 +1,31 @@
 package net.dromard.common.treenode;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.List;
 
-import net.dromard.common.visitable.Visitor;
+import net.dromard.common.visitable.Visitable;
 
 /**
  * File tree node object.
  * @author Gabriel Dromard
  */
-public class FileTreeNode {
-	/** Parent TreeNode. */
-	private FileTreeNode parent = null;
-	/** Node childs. */
-	private ArrayList<FileTreeNode> childs = null;
-	/** Node attached object. */
-	private File file = null;
-
-    /**
-     * Default constructor.
-     *
-     */
-    public FileTreeNode() {
-        /* Empty constructor */
-    }
-
+public class FileTreeNode extends TreeNode implements Visitable {
     /**
      * Construct the node with a given file object.
      * @param file The node attached file.
      */
     public FileTreeNode(final File file) {
-        this();
-        this.file = file;
-    }
-
-    /**
-     * Return node rank.
-     * @return the rank
-     */
-    public final int getRank() {
-        // Initialize rank;
-        int rank = 0;
-        // Retreive parent object
-        FileTreeNode father = this;
-        // Iter until root node
-        while ((father = father.getParent()) != null) {
-            ++rank;
-        }
-        return rank;
-    }
-
-    /**
-     * Is this node a leaf ?
-     * @return If this node is a leaf (if it does not contain any child)
-     */
-    public final boolean isLeaf() {
-        return (childs == null || childs.size() == 0);
+        super(file);
     }
 
     /**
      * Retreive the childs.
      * @return the childs
      */
-    public final ArrayList getChilds() {
-    	if (childs == null) {
-    		childs = new ArrayList<FileTreeNode>();
-	    	if (file != null) {
-	    		File[] tmp = file.listFiles();
+    public final List<TreeNode> getChild() {
+    	if (super.getChild() == null) {
+	    	if (getData() != null) {
+	    		File[] tmp = ((File) getData()).listFiles();
 	    		if (tmp != null && tmp.length > 0) {
 					for (int i = 0; i < tmp.length; ++i) {
 						addChild(new FileTreeNode(tmp[i]));
@@ -74,52 +33,20 @@ public class FileTreeNode {
 	    		}
 	    	}
     	}
-        return childs;
+        return super.getChild();
     }
 	
     /**
      * @return the data
      */
 	public final File getFile() {
-		return file;
+		return (File) getData();
 	}
 	
 	/**
 	 * @param data the data to set
 	 */
 	public final void setFile(final File file) {
-        this.file = file;
-    }
-
-    /**
-     * @return the parent
-     */
-    public final FileTreeNode getParent() {
-        return parent;
-    }
-
-    /**
-     * @param parent the parent to set
-     */
-    private void setParent(final FileTreeNode parent) {
-        this.parent = parent;
-    }
-
-    /**
-     * Add a child to node.
-     * @param child The node child element to be added.
-     */
-    public final void addChild(final FileTreeNode child) {
-        child.setParent(this);
-        this.childs.add(child);
-    }
-
-    /**
-     * Accept method implementation of Visitor pattern.
-     * @param visitor the visitor.
-     * @throws Exception Any exception can occured during visit.
-     */
-    public final void accept(final Visitor visitor) throws Exception {
-        visitor.visit(this);
+        setData(file);
     }
 }

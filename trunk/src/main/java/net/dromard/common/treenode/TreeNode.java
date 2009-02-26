@@ -17,7 +17,7 @@ public class TreeNode implements Visitable {
     /** Parent TreeNode. */
     private TreeNode parent = null;
     /** Node childs. */
-    private List childs = new ArrayList();
+    private List<TreeNode> childs = null;
     /** Node attached object. */
     private Object data = null;
 
@@ -59,25 +59,26 @@ public class TreeNode implements Visitable {
      * @return If this node is a leaf (if it does not contain any child)
      */
     public final boolean isLeaf() {
-        return (childs.size() == 0);
+        return (childs == null || childs.size() == 0);
     }
 
     /**
      * Retreive the childs.
      * @return the childs
      */
-    public final List getChilds() {
+    public List<TreeNode> getChild() {
         return childs;
     }
 
     /**
      * @param childs the childs to set
      */
-    public final void setChilds(final List childs) {
+    public final void setChilds(final List<TreeNode> childs) {
         this.childs = childs;
     }
 
     /**
+     * WARNING this recurse into sub node so as to retrieve all the child counts !
      * @return How many nodes (including myself) in the tree ?
      */
     public final int size() {
@@ -85,9 +86,9 @@ public class TreeNode implements Visitable {
 
         // plus my children.
         if (this.childs != null && this.childs.size() > 0) {
-            Iterator children = this.childs.iterator();
+            Iterator<? extends TreeNode> children = this.childs.iterator();
             while (children.hasNext()) {
-                TreeNode child = (TreeNode) children.next();
+                TreeNode child = children.next();
                 size += child.size();
             }
         }
@@ -129,13 +130,14 @@ public class TreeNode implements Visitable {
      */
     public final void addChild(final TreeNode child) {
         child.setParent(this);
-        this.childs.add(child);
+        if (childs == null) childs = new ArrayList<TreeNode>();
+        childs.add(child);
     }
 
     /**
      * Accept method implementation of Visitor pattern.
      * @param visitor the visitor.
-     * @throws Exception Any exception can occured during visit.
+     * @throws Exception Any exception can occurred during visit.
      */
     public final void accept(final Visitor visitor) throws Exception {
         visitor.visit(this);
