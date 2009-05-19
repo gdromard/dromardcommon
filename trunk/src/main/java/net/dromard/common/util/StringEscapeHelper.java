@@ -22,7 +22,6 @@ public final class StringEscapeHelper {
         // Empty private constructor for util class.
     }
 
-
     /**
      * Replaces characters that may be confused by a HTML parser with their equivalent character entity references.
      * <p>
@@ -53,60 +52,11 @@ public final class StringEscapeHelper {
      * @return escaped String
      */
     public static String escapeHTML(final String s) {
-        if (s == null) {
-            return null;
-        }
-        int length = s.length();
-        int newLength = length;
-        boolean someCharacterEscaped = false;
-        // first check for characters that might
-        // be dangerous and calculate a length
-        // of the string that has escapes.
-        for (int i = 0; i < length; ++i) {
+        StringBuffer sb = new StringBuffer(s.length());
+        for (int i = 0; i < s.length(); ++i) {
             char c = s.charAt(i);
-            int cint = MASK & c;
-            if (cint < CHAR) {
-                switch (c) {
-                    case '\r':
-                    case '\n':
-                    case '\t':
-                    case '\f':
-                        break;
-                    default:
-                        newLength -= 1;
-                        someCharacterEscaped = true;
-                }
-            } else {
-                switch (c) {
-                    case '\"':
-                        newLength += "&quot;".length();
-                        someCharacterEscaped = true;
-                        break;
-                    case '&':
-                    case '\'':
-                        newLength += "&#39;".length();
-                        someCharacterEscaped = true;
-                        break;
-                    case '<':
-                    case '>':
-                        newLength += "&lt;".length();
-                        someCharacterEscaped = true;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        // nothing to escape in the string
-        if (!someCharacterEscaped) {
-            return s;
-        }
-
-        StringBuffer sb = new StringBuffer(newLength);
-        for (int i = 0; i < length; ++i) {
-            char c = s.charAt(i);
-            int cint = MASK & c;
-            if (cint < CHAR) {
+            int cint = StringEscapeHelper.MASK & c;
+            if (cint < StringEscapeHelper.CHAR) {
                 switch (c) {
                 case '\r':
                 case '\n':
@@ -118,49 +68,169 @@ public final class StringEscapeHelper {
                 }
             } else {
                 switch (c) {
-                case '\'': sb.append("&#39;"); break;
-                case '<': sb.append("&lt;"); break;
-                case '>': sb.append("&gt;"); break;
-                case '&': sb.append("&amp;"); break;
-                case '"': sb.append("&quot;"); break;
-                case 'à': sb.append("&agrave;"); break;
-                case 'À': sb.append("&Agrave;"); break;
-                case 'â': sb.append("&acirc;"); break;
-                case 'Â': sb.append("&Acirc;"); break;
-                case 'ä': sb.append("&auml;"); break;
-                case 'Ä': sb.append("&Auml;"); break;
-                case 'å': sb.append("&aring;"); break;
-                case 'Å': sb.append("&Aring;"); break;
-                case 'æ': sb.append("&aelig;"); break;
-                case 'Æ': sb.append("&AElig;"); break;
-                case 'ç': sb.append("&ccedil;"); break;
-                case 'Ç': sb.append("&Ccedil;"); break;
-                case 'é': sb.append("&eacute;"); break;
-                case 'É': sb.append("&Eacute;"); break;
-                case 'è': sb.append("&egrave;"); break;
-                case 'È': sb.append("&Egrave;"); break;
-                case 'ê': sb.append("&ecirc;"); break;
-                case 'Ê': sb.append("&Ecirc;"); break;
-                case 'ë': sb.append("&euml;"); break;
-                case 'Ë': sb.append("&Euml;"); break;
-                case 'ï': sb.append("&iuml;"); break;
-                case 'Ï': sb.append("&Iuml;"); break;
-                case 'ô': sb.append("&ocirc;"); break;
-                case 'Ô': sb.append("&Ocirc;"); break;
-                case 'ö': sb.append("&ouml;"); break;
-                case 'Ö': sb.append("&Ouml;"); break;
-                case 'ø': sb.append("&oslash;"); break;
-                case 'Ø': sb.append("&Oslash;"); break;
-                case 'ß': sb.append("&szlig;"); break;
-                case 'ù': sb.append("&ugrave;"); break;
-                case 'Ù': sb.append("&Ugrave;"); break;
-                case 'û': sb.append("&ucirc;"); break;
-                case 'Û': sb.append("&Ucirc;"); break;
-                case 'ü': sb.append("&uuml;"); break;
-                case 'Ü': sb.append("&Uuml;"); break;
-                case '®': sb.append("&reg;"); break;
-                case '©': sb.append("&copy;"); break;
-                case '€': sb.append("&euro;"); break;
+                case '\'':
+                    sb.append("&#39;");
+                    break;
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                // be carefull with this one (non-breaking whitee space)
+                // case ' ': sb.append("&nbsp;");break;
+                default:
+                    sb.append(c);
+                    break;
+                }
+            }
+        }
+        return StringEscapeHelper.escapeHTMLSpecialCharacters(sb.toString());
+    }
+
+    public static String escapeHTMLSpecialCharacters(final String s) {
+        StringBuffer sb = new StringBuffer(s.length());
+        for (int i = 0; i < s.length(); ++i) {
+            char c = s.charAt(i);
+            int cint = StringEscapeHelper.MASK & c;
+            if (cint < StringEscapeHelper.CHAR) {
+                switch (c) {
+                case '\r':
+                case '\n':
+                case '\t':
+                case '\f':
+                    sb.append(c);
+                    break;
+                default: // Remove this character
+                }
+            } else {
+                switch (c) {
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                case '’':
+                    sb.append("&rsquo;");
+                    break;
+                case '"':
+                    sb.append("&quot;");
+                    break;
+                case 'à':
+                    sb.append("&agrave;");
+                    break;
+                case 'À':
+                    sb.append("&Agrave;");
+                    break;
+                case 'â':
+                    sb.append("&acirc;");
+                    break;
+                case 'Â':
+                    sb.append("&Acirc;");
+                    break;
+                case 'ä':
+                    sb.append("&auml;");
+                    break;
+                case 'Ä':
+                    sb.append("&Auml;");
+                    break;
+                case 'å':
+                    sb.append("&aring;");
+                    break;
+                case 'Å':
+                    sb.append("&Aring;");
+                    break;
+                case 'æ':
+                    sb.append("&aelig;");
+                    break;
+                case 'Æ':
+                    sb.append("&AElig;");
+                    break;
+                case 'ç':
+                    sb.append("&ccedil;");
+                    break;
+                case 'Ç':
+                    sb.append("&Ccedil;");
+                    break;
+                case 'é':
+                    sb.append("&eacute;");
+                    break;
+                case 'É':
+                    sb.append("&Eacute;");
+                    break;
+                case 'è':
+                    sb.append("&egrave;");
+                    break;
+                case 'È':
+                    sb.append("&Egrave;");
+                    break;
+                case 'ê':
+                    sb.append("&ecirc;");
+                    break;
+                case 'Ê':
+                    sb.append("&Ecirc;");
+                    break;
+                case 'ë':
+                    sb.append("&euml;");
+                    break;
+                case 'Ë':
+                    sb.append("&Euml;");
+                    break;
+                case 'ï':
+                    sb.append("&iuml;");
+                    break;
+                case 'Ï':
+                    sb.append("&Iuml;");
+                    break;
+                case 'ô':
+                    sb.append("&ocirc;");
+                    break;
+                case 'Ô':
+                    sb.append("&Ocirc;");
+                    break;
+                case 'ö':
+                    sb.append("&ouml;");
+                    break;
+                case 'Ö':
+                    sb.append("&Ouml;");
+                    break;
+                case 'ø':
+                    sb.append("&oslash;");
+                    break;
+                case 'Ø':
+                    sb.append("&Oslash;");
+                    break;
+                case 'ß':
+                    sb.append("&szlig;");
+                    break;
+                case 'ù':
+                    sb.append("&ugrave;");
+                    break;
+                case 'Ù':
+                    sb.append("&Ugrave;");
+                    break;
+                case 'û':
+                    sb.append("&ucirc;");
+                    break;
+                case 'Û':
+                    sb.append("&Ucirc;");
+                    break;
+                case 'ü':
+                    sb.append("&uuml;");
+                    break;
+                case 'Ü':
+                    sb.append("&Uuml;");
+                    break;
+                case '®':
+                    sb.append("&reg;");
+                    break;
+                case '©':
+                    sb.append("&copy;");
+                    break;
+                case '€':
+                    sb.append("&euro;");
+                    break;
+                case '°':
+                    sb.append("&deg;");
+                    break;
                 // be carefull with this one (non-breaking whitee space)
                 // case ' ': sb.append("&nbsp;");break;
                 default:
@@ -203,14 +273,14 @@ public final class StringEscapeHelper {
         for (int i = 0; i < length; ++i) {
             char c = s.charAt(i);
             switch (c) {
-                case '\\':
-                case '\"':
-                case '\'':
-                case '\0':
-                    newLength += 1;
-                    break;
-                default:
-                    break;
+            case '\\':
+            case '\"':
+            case '\'':
+            case '\0':
+                newLength += 1;
+                break;
+            default:
+                break;
             }
         }
         if (length == newLength) {
@@ -259,16 +329,16 @@ public final class StringEscapeHelper {
         for (int i = 0; i < length; ++i) {
             char c = s.charAt(i);
             switch (c) {
-                case '\"':
-                case '\'':
-                case '\n':
-                case '\r':
-                case '\t':
-                case '\\':
-                    newLength += 1;
-                    break;
-                default:
-                    break;
+            case '\"':
+            case '\'':
+            case '\n':
+            case '\r':
+            case '\t':
+            case '\\':
+                newLength += 1;
+                break;
+            default:
+                break;
             }
         }
         if (length == newLength) {
@@ -757,7 +827,6 @@ public final class StringEscapeHelper {
     /** Integer representation of lower case character EURO. */
     public static final int MIN_EURO = 8364;
 
-
     /** Integer representation of upper case character AGRAVE. */
     public static final int MAJ_AGRAVE = 192;
     /** Integer representation of upper case character AACUTE. */
@@ -887,264 +956,263 @@ public final class StringEscapeHelper {
     /** Integer representation of upper case character DAGGER. */
     public static final int MAJ_DAGGER = 8225;
 
-
     /** Html Entities map. */
     public static final Map HTML_ENTITIES = new HashMap();
 
     static {
-        HTML_ENTITIES.put("aacute", new Integer(MIN_AACUTE));
-        HTML_ENTITIES.put("acirc", new Integer(MIN_ACIRC));
-        HTML_ENTITIES.put("acute", new Integer(MIN_ACUTE));
-        HTML_ENTITIES.put("aelig", new Integer(MIN_AELIG));
-        HTML_ENTITIES.put("agrave", new Integer(MIN_AGRAVE));
-        HTML_ENTITIES.put("alefsym", new Integer(MIN_ALEFSYM));
-        HTML_ENTITIES.put("alpha", new Integer(MIN_ALPHA));
-        HTML_ENTITIES.put("amp", new Integer(MIN_AMP));
-        HTML_ENTITIES.put("and", new Integer(MIN_AND));
-        HTML_ENTITIES.put("ang", new Integer(MIN_ANG));
-        HTML_ENTITIES.put("aring", new Integer(MIN_ARING));
-        HTML_ENTITIES.put("asymp", new Integer(MIN_ASYMP));
-        HTML_ENTITIES.put("atilde", new Integer(MIN_ATILDE));
-        HTML_ENTITIES.put("auml", new Integer(MIN_AUML));
-        HTML_ENTITIES.put("bdquo", new Integer(MIN_BDQUO));
-        HTML_ENTITIES.put("beta", new Integer(MIN_BETA));
-        HTML_ENTITIES.put("brvbar", new Integer(MIN_BRVBAR));
-        HTML_ENTITIES.put("bull", new Integer(MIN_BULL));
-        HTML_ENTITIES.put("cap", new Integer(MIN_CAP));
-        HTML_ENTITIES.put("ccedil", new Integer(MIN_CCEDIL));
-        HTML_ENTITIES.put("cedil", new Integer(MIN_CEDIL));
-        HTML_ENTITIES.put("cent", new Integer(MIN_CENT));
-        HTML_ENTITIES.put("chi", new Integer(MIN_CHI));
-        HTML_ENTITIES.put("circ", new Integer(MIN_CIRC));
-        HTML_ENTITIES.put("clubs", new Integer(MIN_CLUBS));
-        HTML_ENTITIES.put("cong", new Integer(MIN_CONG));
-        HTML_ENTITIES.put("copy", new Integer(MIN_COPY));
-        HTML_ENTITIES.put("crarr", new Integer(MIN_CRARR));
-        HTML_ENTITIES.put("cup", new Integer(MIN_CUP));
-        HTML_ENTITIES.put("curren", new Integer(MIN_CURREN));
-        HTML_ENTITIES.put("dagger", new Integer(MIN_DAGGER));
-        HTML_ENTITIES.put("darr", new Integer(MIN_DARR));
-        HTML_ENTITIES.put("deg", new Integer(MIN_DEG));
-        HTML_ENTITIES.put("delta", new Integer(MIN_DELTA));
-        HTML_ENTITIES.put("diams", new Integer(MIN_DIAMS));
-        HTML_ENTITIES.put("divide", new Integer(MIN_DIVIDE));
-        HTML_ENTITIES.put("eacute", new Integer(MIN_EACUTE));
-        HTML_ENTITIES.put("ecirc", new Integer(MIN_ECIRC));
-        HTML_ENTITIES.put("egrave", new Integer(MIN_EGRAVE));
-        HTML_ENTITIES.put("empty", new Integer(MIN_EMPTY));
-        HTML_ENTITIES.put("emsp", new Integer(MIN_EMSP));
-        HTML_ENTITIES.put("ensp", new Integer(MIN_ENSP));
-        HTML_ENTITIES.put("epsilon", new Integer(MIN_EPSILON));
-        HTML_ENTITIES.put("equiv", new Integer(MIN_EQUIV));
-        HTML_ENTITIES.put("eta", new Integer(MIN_ETA));
-        HTML_ENTITIES.put("eth", new Integer(MIN_ETH));
-        HTML_ENTITIES.put("euml", new Integer(MIN_EUML));
-        HTML_ENTITIES.put("euro", new Integer(MIN_EURO));
-        HTML_ENTITIES.put("exist", new Integer(MIN_EXIST));
-        HTML_ENTITIES.put("fnof", new Integer(MIN_FNOF));
-        HTML_ENTITIES.put("forall", new Integer(MIN_FORALL));
-        HTML_ENTITIES.put("frac12", new Integer(MIN_FRAC12));
-        HTML_ENTITIES.put("frac14", new Integer(MIN_FRAC14));
-        HTML_ENTITIES.put("frac34", new Integer(MIN_FRAC34));
-        HTML_ENTITIES.put("frasl", new Integer(MIN_FRASL));
-        HTML_ENTITIES.put("gamma", new Integer(MIN_GAMMA));
-        HTML_ENTITIES.put("ge", new Integer(MIN_GE));
-        HTML_ENTITIES.put("gt", new Integer(MIN_GT));
-        HTML_ENTITIES.put("harr", new Integer(MIN_HARR));
-        HTML_ENTITIES.put("hearts", new Integer(MIN_HEARTS));
-        HTML_ENTITIES.put("hellip", new Integer(MIN_HELLIP));
-        HTML_ENTITIES.put("iacute", new Integer(MIN_IACUTE));
-        HTML_ENTITIES.put("icirc", new Integer(MIN_ICIRC));
-        HTML_ENTITIES.put("iexcl", new Integer(MIN_IEXCL));
-        HTML_ENTITIES.put("igrave", new Integer(MIN_IGRAVE));
-        HTML_ENTITIES.put("image", new Integer(MIN_IMAGE));
-        HTML_ENTITIES.put("infin", new Integer(MIN_INFIN));
-        HTML_ENTITIES.put("int", new Integer(MIN_INT));
-        HTML_ENTITIES.put("iota", new Integer(MIN_IOTA));
-        HTML_ENTITIES.put("iquest", new Integer(MIN_IQUEST));
-        HTML_ENTITIES.put("isin", new Integer(MIN_ISIN));
-        HTML_ENTITIES.put("iuml", new Integer(MIN_IUML));
-        HTML_ENTITIES.put("kappa", new Integer(MIN_KAPPA));
-        HTML_ENTITIES.put("lambda", new Integer(MIN_LAMBDA));
-        HTML_ENTITIES.put("lang", new Integer(MIN_LANG));
-        HTML_ENTITIES.put("laquo", new Integer(MIN_LAQUO));
-        HTML_ENTITIES.put("larr", new Integer(MIN_LARR));
-        HTML_ENTITIES.put("lceil", new Integer(MIN_LCEIL));
-        HTML_ENTITIES.put("ldquo", new Integer(MIN_LDQUO));
-        HTML_ENTITIES.put("le", new Integer(MIN_LE));
-        HTML_ENTITIES.put("lfloor", new Integer(MIN_LFLOOR));
-        HTML_ENTITIES.put("lowast", new Integer(MIN_LOWAST));
-        HTML_ENTITIES.put("loz", new Integer(MIN_LOZ));
-        HTML_ENTITIES.put("lrm", new Integer(MIN_LRM));
-        HTML_ENTITIES.put("lsaquo", new Integer(MIN_LSAQUO));
-        HTML_ENTITIES.put("lsquo", new Integer(MIN_LSQUO));
-        HTML_ENTITIES.put("lt", new Integer(MIN_LT));
-        HTML_ENTITIES.put("macr", new Integer(MIN_MACR));
-        HTML_ENTITIES.put("mdash", new Integer(MIN_MDASH));
-        HTML_ENTITIES.put("micro", new Integer(MIN_MICRO));
-        HTML_ENTITIES.put("middot", new Integer(MIN_MIDDOT));
-        HTML_ENTITIES.put("minus", new Integer(MIN_MINUS));
-        HTML_ENTITIES.put("mu", new Integer(MIN_MU));
-        HTML_ENTITIES.put("nabla", new Integer(MIN_NABLA));
-        HTML_ENTITIES.put("nbsp", new Integer(MIN_NBSP));
-        HTML_ENTITIES.put("ndash", new Integer(MIN_NDASH));
-        HTML_ENTITIES.put("ne", new Integer(MIN_NE));
-        HTML_ENTITIES.put("ni", new Integer(MIN_NI));
-        HTML_ENTITIES.put("not", new Integer(MIN_NOT));
-        HTML_ENTITIES.put("notin", new Integer(MIN_NOTIN));
-        HTML_ENTITIES.put("nsub", new Integer(MIN_NSUB));
-        HTML_ENTITIES.put("ntilde", new Integer(MIN_NTILDE));
-        HTML_ENTITIES.put("nu", new Integer(MIN_NU));
-        HTML_ENTITIES.put("oacute", new Integer(MIN_OACUTE));
-        HTML_ENTITIES.put("ocirc", new Integer(MIN_OCIRC));
-        HTML_ENTITIES.put("oelig", new Integer(MIN_OELIG));
-        HTML_ENTITIES.put("ograve", new Integer(MIN_OGRAVE));
-        HTML_ENTITIES.put("oline", new Integer(MIN_OLINE));
-        HTML_ENTITIES.put("omega", new Integer(MIN_OMEGA));
-        HTML_ENTITIES.put("omicron", new Integer(MIN_OMICRON));
-        HTML_ENTITIES.put("oplus", new Integer(MIN_OPLUS));
-        HTML_ENTITIES.put("or", new Integer(MIN_OR));
-        HTML_ENTITIES.put("ordf", new Integer(MIN_ORDF));
-        HTML_ENTITIES.put("ordm", new Integer(MIN_ORDM));
-        HTML_ENTITIES.put("oslash", new Integer(MIN_OSLASH));
-        HTML_ENTITIES.put("otilde", new Integer(MIN_OTILDE));
-        HTML_ENTITIES.put("otimes", new Integer(MIN_OTIMES));
-        HTML_ENTITIES.put("ouml", new Integer(MIN_OUML));
-        HTML_ENTITIES.put("para", new Integer(MIN_PARA));
-        HTML_ENTITIES.put("part", new Integer(MIN_PART));
-        HTML_ENTITIES.put("permil", new Integer(MIN_PERMIL));
-        HTML_ENTITIES.put("perp", new Integer(MIN_PERP));
-        HTML_ENTITIES.put("phi", new Integer(MIN_PHI));
-        HTML_ENTITIES.put("pi", new Integer(MIN_PI));
-        HTML_ENTITIES.put("piv", new Integer(MIN_PIV));
-        HTML_ENTITIES.put("plusmn", new Integer(MIN_PLUSMN));
-        HTML_ENTITIES.put("pound", new Integer(MIN_POUND));
-        HTML_ENTITIES.put("prime", new Integer(MIN_PRIME));
-        HTML_ENTITIES.put("prod", new Integer(MIN_PROD));
-        HTML_ENTITIES.put("prop", new Integer(MIN_PROP));
-        HTML_ENTITIES.put("psi", new Integer(MIN_PSI));
-        HTML_ENTITIES.put("quot", new Integer(MIN_QUOT));
-        HTML_ENTITIES.put("radic", new Integer(MIN_RADIC));
-        HTML_ENTITIES.put("rang", new Integer(MIN_RANG));
-        HTML_ENTITIES.put("raquo", new Integer(MIN_RAQUO));
-        HTML_ENTITIES.put("rarr", new Integer(MIN_RARR));
-        HTML_ENTITIES.put("rceil", new Integer(MIN_RCEIL));
-        HTML_ENTITIES.put("rdquo", new Integer(MIN_RDQUO));
-        HTML_ENTITIES.put("real", new Integer(MIN_REAL));
-        HTML_ENTITIES.put("reg", new Integer(MIN_REG));
-        HTML_ENTITIES.put("rfloor", new Integer(MIN_RFLOOR));
-        HTML_ENTITIES.put("rho", new Integer(MIN_RHO));
-        HTML_ENTITIES.put("rlm", new Integer(MIN_RLM));
-        HTML_ENTITIES.put("rsaquo", new Integer(MIN_RSAQUO));
-        HTML_ENTITIES.put("rsquo", new Integer(MIN_RSQUO));
-        HTML_ENTITIES.put("sbquo", new Integer(MIN_SBQUO));
-        HTML_ENTITIES.put("scaron", new Integer(MIN_SCARON));
-        HTML_ENTITIES.put("sdot", new Integer(MIN_SDOT));
-        HTML_ENTITIES.put("sect", new Integer(MIN_SECT));
-        HTML_ENTITIES.put("shy", new Integer(MIN_SHY));
-        HTML_ENTITIES.put("sigma", new Integer(MIN_SIGMA));
-        HTML_ENTITIES.put("sigmaf", new Integer(MIN_SIGMAF));
-        HTML_ENTITIES.put("sim", new Integer(MIN_SIM));
-        HTML_ENTITIES.put("spades", new Integer(MIN_SPADES));
-        HTML_ENTITIES.put("sub", new Integer(MIN_SUB));
-        HTML_ENTITIES.put("sube", new Integer(MIN_SUBE));
-        HTML_ENTITIES.put("sum", new Integer(MIN_SUM));
-        HTML_ENTITIES.put("sup", new Integer(MIN_SUP));
-        HTML_ENTITIES.put("sup1", new Integer(MIN_SUP1));
-        HTML_ENTITIES.put("sup2", new Integer(MIN_SUP2));
-        HTML_ENTITIES.put("sup3", new Integer(MIN_SUP3));
-        HTML_ENTITIES.put("supe", new Integer(MIN_SUPE));
-        HTML_ENTITIES.put("szlig", new Integer(MIN_SZLIG));
-        HTML_ENTITIES.put("tau", new Integer(MIN_TAU));
-        HTML_ENTITIES.put("there4", new Integer(MIN_THERE4));
-        HTML_ENTITIES.put("theta", new Integer(MIN_THETA));
-        HTML_ENTITIES.put("thetasym", new Integer(MIN_THETASYM));
-        HTML_ENTITIES.put("thinsp", new Integer(MIN_THINSP));
-        HTML_ENTITIES.put("thorn", new Integer(MIN_THORN));
-        HTML_ENTITIES.put("tilde", new Integer(MIN_TILDE));
-        HTML_ENTITIES.put("times", new Integer(MIN_TIMES));
-        HTML_ENTITIES.put("trade", new Integer(MIN_TRADE));
-        HTML_ENTITIES.put("uacute", new Integer(MIN_UACUTE));
-        HTML_ENTITIES.put("uarr", new Integer(MIN_UARR));
-        HTML_ENTITIES.put("ucirc", new Integer(MIN_UCIRC));
-        HTML_ENTITIES.put("ugrave", new Integer(MIN_UGRAVE));
-        HTML_ENTITIES.put("uml", new Integer(MIN_UML));
-        HTML_ENTITIES.put("upsih", new Integer(MIN_UPSIH));
-        HTML_ENTITIES.put("upsilon", new Integer(MIN_UPSILON));
-        HTML_ENTITIES.put("uuml", new Integer(MIN_UUML));
-        HTML_ENTITIES.put("weierp", new Integer(MIN_WEIERP));
-        HTML_ENTITIES.put("xi", new Integer(MIN_XI));
-        HTML_ENTITIES.put("yacute", new Integer(MIN_YACUTE));
-        HTML_ENTITIES.put("yen", new Integer(MIN_YEN));
-        HTML_ENTITIES.put("yuml", new Integer(MIN_YUML));
-        HTML_ENTITIES.put("zeta", new Integer(MIN_ZETA));
-        HTML_ENTITIES.put("zwj", new Integer(MIN_ZWJ));
-        HTML_ENTITIES.put("zwnj", new Integer(MIN_ZWNJ));
+        StringEscapeHelper.HTML_ENTITIES.put("aacute", new Integer(StringEscapeHelper.MIN_AACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("acirc", new Integer(StringEscapeHelper.MIN_ACIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("acute", new Integer(StringEscapeHelper.MIN_ACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("aelig", new Integer(StringEscapeHelper.MIN_AELIG));
+        StringEscapeHelper.HTML_ENTITIES.put("agrave", new Integer(StringEscapeHelper.MIN_AGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("alefsym", new Integer(StringEscapeHelper.MIN_ALEFSYM));
+        StringEscapeHelper.HTML_ENTITIES.put("alpha", new Integer(StringEscapeHelper.MIN_ALPHA));
+        StringEscapeHelper.HTML_ENTITIES.put("amp", new Integer(StringEscapeHelper.MIN_AMP));
+        StringEscapeHelper.HTML_ENTITIES.put("and", new Integer(StringEscapeHelper.MIN_AND));
+        StringEscapeHelper.HTML_ENTITIES.put("ang", new Integer(StringEscapeHelper.MIN_ANG));
+        StringEscapeHelper.HTML_ENTITIES.put("aring", new Integer(StringEscapeHelper.MIN_ARING));
+        StringEscapeHelper.HTML_ENTITIES.put("asymp", new Integer(StringEscapeHelper.MIN_ASYMP));
+        StringEscapeHelper.HTML_ENTITIES.put("atilde", new Integer(StringEscapeHelper.MIN_ATILDE));
+        StringEscapeHelper.HTML_ENTITIES.put("auml", new Integer(StringEscapeHelper.MIN_AUML));
+        StringEscapeHelper.HTML_ENTITIES.put("bdquo", new Integer(StringEscapeHelper.MIN_BDQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("beta", new Integer(StringEscapeHelper.MIN_BETA));
+        StringEscapeHelper.HTML_ENTITIES.put("brvbar", new Integer(StringEscapeHelper.MIN_BRVBAR));
+        StringEscapeHelper.HTML_ENTITIES.put("bull", new Integer(StringEscapeHelper.MIN_BULL));
+        StringEscapeHelper.HTML_ENTITIES.put("cap", new Integer(StringEscapeHelper.MIN_CAP));
+        StringEscapeHelper.HTML_ENTITIES.put("ccedil", new Integer(StringEscapeHelper.MIN_CCEDIL));
+        StringEscapeHelper.HTML_ENTITIES.put("cedil", new Integer(StringEscapeHelper.MIN_CEDIL));
+        StringEscapeHelper.HTML_ENTITIES.put("cent", new Integer(StringEscapeHelper.MIN_CENT));
+        StringEscapeHelper.HTML_ENTITIES.put("chi", new Integer(StringEscapeHelper.MIN_CHI));
+        StringEscapeHelper.HTML_ENTITIES.put("circ", new Integer(StringEscapeHelper.MIN_CIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("clubs", new Integer(StringEscapeHelper.MIN_CLUBS));
+        StringEscapeHelper.HTML_ENTITIES.put("cong", new Integer(StringEscapeHelper.MIN_CONG));
+        StringEscapeHelper.HTML_ENTITIES.put("copy", new Integer(StringEscapeHelper.MIN_COPY));
+        StringEscapeHelper.HTML_ENTITIES.put("crarr", new Integer(StringEscapeHelper.MIN_CRARR));
+        StringEscapeHelper.HTML_ENTITIES.put("cup", new Integer(StringEscapeHelper.MIN_CUP));
+        StringEscapeHelper.HTML_ENTITIES.put("curren", new Integer(StringEscapeHelper.MIN_CURREN));
+        StringEscapeHelper.HTML_ENTITIES.put("dagger", new Integer(StringEscapeHelper.MIN_DAGGER));
+        StringEscapeHelper.HTML_ENTITIES.put("darr", new Integer(StringEscapeHelper.MIN_DARR));
+        StringEscapeHelper.HTML_ENTITIES.put("deg", new Integer(StringEscapeHelper.MIN_DEG));
+        StringEscapeHelper.HTML_ENTITIES.put("delta", new Integer(StringEscapeHelper.MIN_DELTA));
+        StringEscapeHelper.HTML_ENTITIES.put("diams", new Integer(StringEscapeHelper.MIN_DIAMS));
+        StringEscapeHelper.HTML_ENTITIES.put("divide", new Integer(StringEscapeHelper.MIN_DIVIDE));
+        StringEscapeHelper.HTML_ENTITIES.put("eacute", new Integer(StringEscapeHelper.MIN_EACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("ecirc", new Integer(StringEscapeHelper.MIN_ECIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("egrave", new Integer(StringEscapeHelper.MIN_EGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("empty", new Integer(StringEscapeHelper.MIN_EMPTY));
+        StringEscapeHelper.HTML_ENTITIES.put("emsp", new Integer(StringEscapeHelper.MIN_EMSP));
+        StringEscapeHelper.HTML_ENTITIES.put("ensp", new Integer(StringEscapeHelper.MIN_ENSP));
+        StringEscapeHelper.HTML_ENTITIES.put("epsilon", new Integer(StringEscapeHelper.MIN_EPSILON));
+        StringEscapeHelper.HTML_ENTITIES.put("equiv", new Integer(StringEscapeHelper.MIN_EQUIV));
+        StringEscapeHelper.HTML_ENTITIES.put("eta", new Integer(StringEscapeHelper.MIN_ETA));
+        StringEscapeHelper.HTML_ENTITIES.put("eth", new Integer(StringEscapeHelper.MIN_ETH));
+        StringEscapeHelper.HTML_ENTITIES.put("euml", new Integer(StringEscapeHelper.MIN_EUML));
+        StringEscapeHelper.HTML_ENTITIES.put("euro", new Integer(StringEscapeHelper.MIN_EURO));
+        StringEscapeHelper.HTML_ENTITIES.put("exist", new Integer(StringEscapeHelper.MIN_EXIST));
+        StringEscapeHelper.HTML_ENTITIES.put("fnof", new Integer(StringEscapeHelper.MIN_FNOF));
+        StringEscapeHelper.HTML_ENTITIES.put("forall", new Integer(StringEscapeHelper.MIN_FORALL));
+        StringEscapeHelper.HTML_ENTITIES.put("frac12", new Integer(StringEscapeHelper.MIN_FRAC12));
+        StringEscapeHelper.HTML_ENTITIES.put("frac14", new Integer(StringEscapeHelper.MIN_FRAC14));
+        StringEscapeHelper.HTML_ENTITIES.put("frac34", new Integer(StringEscapeHelper.MIN_FRAC34));
+        StringEscapeHelper.HTML_ENTITIES.put("frasl", new Integer(StringEscapeHelper.MIN_FRASL));
+        StringEscapeHelper.HTML_ENTITIES.put("gamma", new Integer(StringEscapeHelper.MIN_GAMMA));
+        StringEscapeHelper.HTML_ENTITIES.put("ge", new Integer(StringEscapeHelper.MIN_GE));
+        StringEscapeHelper.HTML_ENTITIES.put("gt", new Integer(StringEscapeHelper.MIN_GT));
+        StringEscapeHelper.HTML_ENTITIES.put("harr", new Integer(StringEscapeHelper.MIN_HARR));
+        StringEscapeHelper.HTML_ENTITIES.put("hearts", new Integer(StringEscapeHelper.MIN_HEARTS));
+        StringEscapeHelper.HTML_ENTITIES.put("hellip", new Integer(StringEscapeHelper.MIN_HELLIP));
+        StringEscapeHelper.HTML_ENTITIES.put("iacute", new Integer(StringEscapeHelper.MIN_IACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("icirc", new Integer(StringEscapeHelper.MIN_ICIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("iexcl", new Integer(StringEscapeHelper.MIN_IEXCL));
+        StringEscapeHelper.HTML_ENTITIES.put("igrave", new Integer(StringEscapeHelper.MIN_IGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("image", new Integer(StringEscapeHelper.MIN_IMAGE));
+        StringEscapeHelper.HTML_ENTITIES.put("infin", new Integer(StringEscapeHelper.MIN_INFIN));
+        StringEscapeHelper.HTML_ENTITIES.put("int", new Integer(StringEscapeHelper.MIN_INT));
+        StringEscapeHelper.HTML_ENTITIES.put("iota", new Integer(StringEscapeHelper.MIN_IOTA));
+        StringEscapeHelper.HTML_ENTITIES.put("iquest", new Integer(StringEscapeHelper.MIN_IQUEST));
+        StringEscapeHelper.HTML_ENTITIES.put("isin", new Integer(StringEscapeHelper.MIN_ISIN));
+        StringEscapeHelper.HTML_ENTITIES.put("iuml", new Integer(StringEscapeHelper.MIN_IUML));
+        StringEscapeHelper.HTML_ENTITIES.put("kappa", new Integer(StringEscapeHelper.MIN_KAPPA));
+        StringEscapeHelper.HTML_ENTITIES.put("lambda", new Integer(StringEscapeHelper.MIN_LAMBDA));
+        StringEscapeHelper.HTML_ENTITIES.put("lang", new Integer(StringEscapeHelper.MIN_LANG));
+        StringEscapeHelper.HTML_ENTITIES.put("laquo", new Integer(StringEscapeHelper.MIN_LAQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("larr", new Integer(StringEscapeHelper.MIN_LARR));
+        StringEscapeHelper.HTML_ENTITIES.put("lceil", new Integer(StringEscapeHelper.MIN_LCEIL));
+        StringEscapeHelper.HTML_ENTITIES.put("ldquo", new Integer(StringEscapeHelper.MIN_LDQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("le", new Integer(StringEscapeHelper.MIN_LE));
+        StringEscapeHelper.HTML_ENTITIES.put("lfloor", new Integer(StringEscapeHelper.MIN_LFLOOR));
+        StringEscapeHelper.HTML_ENTITIES.put("lowast", new Integer(StringEscapeHelper.MIN_LOWAST));
+        StringEscapeHelper.HTML_ENTITIES.put("loz", new Integer(StringEscapeHelper.MIN_LOZ));
+        StringEscapeHelper.HTML_ENTITIES.put("lrm", new Integer(StringEscapeHelper.MIN_LRM));
+        StringEscapeHelper.HTML_ENTITIES.put("lsaquo", new Integer(StringEscapeHelper.MIN_LSAQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("lsquo", new Integer(StringEscapeHelper.MIN_LSQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("lt", new Integer(StringEscapeHelper.MIN_LT));
+        StringEscapeHelper.HTML_ENTITIES.put("macr", new Integer(StringEscapeHelper.MIN_MACR));
+        StringEscapeHelper.HTML_ENTITIES.put("mdash", new Integer(StringEscapeHelper.MIN_MDASH));
+        StringEscapeHelper.HTML_ENTITIES.put("micro", new Integer(StringEscapeHelper.MIN_MICRO));
+        StringEscapeHelper.HTML_ENTITIES.put("middot", new Integer(StringEscapeHelper.MIN_MIDDOT));
+        StringEscapeHelper.HTML_ENTITIES.put("minus", new Integer(StringEscapeHelper.MIN_MINUS));
+        StringEscapeHelper.HTML_ENTITIES.put("mu", new Integer(StringEscapeHelper.MIN_MU));
+        StringEscapeHelper.HTML_ENTITIES.put("nabla", new Integer(StringEscapeHelper.MIN_NABLA));
+        StringEscapeHelper.HTML_ENTITIES.put("nbsp", new Integer(StringEscapeHelper.MIN_NBSP));
+        StringEscapeHelper.HTML_ENTITIES.put("ndash", new Integer(StringEscapeHelper.MIN_NDASH));
+        StringEscapeHelper.HTML_ENTITIES.put("ne", new Integer(StringEscapeHelper.MIN_NE));
+        StringEscapeHelper.HTML_ENTITIES.put("ni", new Integer(StringEscapeHelper.MIN_NI));
+        StringEscapeHelper.HTML_ENTITIES.put("not", new Integer(StringEscapeHelper.MIN_NOT));
+        StringEscapeHelper.HTML_ENTITIES.put("notin", new Integer(StringEscapeHelper.MIN_NOTIN));
+        StringEscapeHelper.HTML_ENTITIES.put("nsub", new Integer(StringEscapeHelper.MIN_NSUB));
+        StringEscapeHelper.HTML_ENTITIES.put("ntilde", new Integer(StringEscapeHelper.MIN_NTILDE));
+        StringEscapeHelper.HTML_ENTITIES.put("nu", new Integer(StringEscapeHelper.MIN_NU));
+        StringEscapeHelper.HTML_ENTITIES.put("oacute", new Integer(StringEscapeHelper.MIN_OACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("ocirc", new Integer(StringEscapeHelper.MIN_OCIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("oelig", new Integer(StringEscapeHelper.MIN_OELIG));
+        StringEscapeHelper.HTML_ENTITIES.put("ograve", new Integer(StringEscapeHelper.MIN_OGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("oline", new Integer(StringEscapeHelper.MIN_OLINE));
+        StringEscapeHelper.HTML_ENTITIES.put("omega", new Integer(StringEscapeHelper.MIN_OMEGA));
+        StringEscapeHelper.HTML_ENTITIES.put("omicron", new Integer(StringEscapeHelper.MIN_OMICRON));
+        StringEscapeHelper.HTML_ENTITIES.put("oplus", new Integer(StringEscapeHelper.MIN_OPLUS));
+        StringEscapeHelper.HTML_ENTITIES.put("or", new Integer(StringEscapeHelper.MIN_OR));
+        StringEscapeHelper.HTML_ENTITIES.put("ordf", new Integer(StringEscapeHelper.MIN_ORDF));
+        StringEscapeHelper.HTML_ENTITIES.put("ordm", new Integer(StringEscapeHelper.MIN_ORDM));
+        StringEscapeHelper.HTML_ENTITIES.put("oslash", new Integer(StringEscapeHelper.MIN_OSLASH));
+        StringEscapeHelper.HTML_ENTITIES.put("otilde", new Integer(StringEscapeHelper.MIN_OTILDE));
+        StringEscapeHelper.HTML_ENTITIES.put("otimes", new Integer(StringEscapeHelper.MIN_OTIMES));
+        StringEscapeHelper.HTML_ENTITIES.put("ouml", new Integer(StringEscapeHelper.MIN_OUML));
+        StringEscapeHelper.HTML_ENTITIES.put("para", new Integer(StringEscapeHelper.MIN_PARA));
+        StringEscapeHelper.HTML_ENTITIES.put("part", new Integer(StringEscapeHelper.MIN_PART));
+        StringEscapeHelper.HTML_ENTITIES.put("permil", new Integer(StringEscapeHelper.MIN_PERMIL));
+        StringEscapeHelper.HTML_ENTITIES.put("perp", new Integer(StringEscapeHelper.MIN_PERP));
+        StringEscapeHelper.HTML_ENTITIES.put("phi", new Integer(StringEscapeHelper.MIN_PHI));
+        StringEscapeHelper.HTML_ENTITIES.put("pi", new Integer(StringEscapeHelper.MIN_PI));
+        StringEscapeHelper.HTML_ENTITIES.put("piv", new Integer(StringEscapeHelper.MIN_PIV));
+        StringEscapeHelper.HTML_ENTITIES.put("plusmn", new Integer(StringEscapeHelper.MIN_PLUSMN));
+        StringEscapeHelper.HTML_ENTITIES.put("pound", new Integer(StringEscapeHelper.MIN_POUND));
+        StringEscapeHelper.HTML_ENTITIES.put("prime", new Integer(StringEscapeHelper.MIN_PRIME));
+        StringEscapeHelper.HTML_ENTITIES.put("prod", new Integer(StringEscapeHelper.MIN_PROD));
+        StringEscapeHelper.HTML_ENTITIES.put("prop", new Integer(StringEscapeHelper.MIN_PROP));
+        StringEscapeHelper.HTML_ENTITIES.put("psi", new Integer(StringEscapeHelper.MIN_PSI));
+        StringEscapeHelper.HTML_ENTITIES.put("quot", new Integer(StringEscapeHelper.MIN_QUOT));
+        StringEscapeHelper.HTML_ENTITIES.put("radic", new Integer(StringEscapeHelper.MIN_RADIC));
+        StringEscapeHelper.HTML_ENTITIES.put("rang", new Integer(StringEscapeHelper.MIN_RANG));
+        StringEscapeHelper.HTML_ENTITIES.put("raquo", new Integer(StringEscapeHelper.MIN_RAQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("rarr", new Integer(StringEscapeHelper.MIN_RARR));
+        StringEscapeHelper.HTML_ENTITIES.put("rceil", new Integer(StringEscapeHelper.MIN_RCEIL));
+        StringEscapeHelper.HTML_ENTITIES.put("rdquo", new Integer(StringEscapeHelper.MIN_RDQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("real", new Integer(StringEscapeHelper.MIN_REAL));
+        StringEscapeHelper.HTML_ENTITIES.put("reg", new Integer(StringEscapeHelper.MIN_REG));
+        StringEscapeHelper.HTML_ENTITIES.put("rfloor", new Integer(StringEscapeHelper.MIN_RFLOOR));
+        StringEscapeHelper.HTML_ENTITIES.put("rho", new Integer(StringEscapeHelper.MIN_RHO));
+        StringEscapeHelper.HTML_ENTITIES.put("rlm", new Integer(StringEscapeHelper.MIN_RLM));
+        StringEscapeHelper.HTML_ENTITIES.put("rsaquo", new Integer(StringEscapeHelper.MIN_RSAQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("rsquo", new Integer(StringEscapeHelper.MIN_RSQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("sbquo", new Integer(StringEscapeHelper.MIN_SBQUO));
+        StringEscapeHelper.HTML_ENTITIES.put("scaron", new Integer(StringEscapeHelper.MIN_SCARON));
+        StringEscapeHelper.HTML_ENTITIES.put("sdot", new Integer(StringEscapeHelper.MIN_SDOT));
+        StringEscapeHelper.HTML_ENTITIES.put("sect", new Integer(StringEscapeHelper.MIN_SECT));
+        StringEscapeHelper.HTML_ENTITIES.put("shy", new Integer(StringEscapeHelper.MIN_SHY));
+        StringEscapeHelper.HTML_ENTITIES.put("sigma", new Integer(StringEscapeHelper.MIN_SIGMA));
+        StringEscapeHelper.HTML_ENTITIES.put("sigmaf", new Integer(StringEscapeHelper.MIN_SIGMAF));
+        StringEscapeHelper.HTML_ENTITIES.put("sim", new Integer(StringEscapeHelper.MIN_SIM));
+        StringEscapeHelper.HTML_ENTITIES.put("spades", new Integer(StringEscapeHelper.MIN_SPADES));
+        StringEscapeHelper.HTML_ENTITIES.put("sub", new Integer(StringEscapeHelper.MIN_SUB));
+        StringEscapeHelper.HTML_ENTITIES.put("sube", new Integer(StringEscapeHelper.MIN_SUBE));
+        StringEscapeHelper.HTML_ENTITIES.put("sum", new Integer(StringEscapeHelper.MIN_SUM));
+        StringEscapeHelper.HTML_ENTITIES.put("sup", new Integer(StringEscapeHelper.MIN_SUP));
+        StringEscapeHelper.HTML_ENTITIES.put("sup1", new Integer(StringEscapeHelper.MIN_SUP1));
+        StringEscapeHelper.HTML_ENTITIES.put("sup2", new Integer(StringEscapeHelper.MIN_SUP2));
+        StringEscapeHelper.HTML_ENTITIES.put("sup3", new Integer(StringEscapeHelper.MIN_SUP3));
+        StringEscapeHelper.HTML_ENTITIES.put("supe", new Integer(StringEscapeHelper.MIN_SUPE));
+        StringEscapeHelper.HTML_ENTITIES.put("szlig", new Integer(StringEscapeHelper.MIN_SZLIG));
+        StringEscapeHelper.HTML_ENTITIES.put("tau", new Integer(StringEscapeHelper.MIN_TAU));
+        StringEscapeHelper.HTML_ENTITIES.put("there4", new Integer(StringEscapeHelper.MIN_THERE4));
+        StringEscapeHelper.HTML_ENTITIES.put("theta", new Integer(StringEscapeHelper.MIN_THETA));
+        StringEscapeHelper.HTML_ENTITIES.put("thetasym", new Integer(StringEscapeHelper.MIN_THETASYM));
+        StringEscapeHelper.HTML_ENTITIES.put("thinsp", new Integer(StringEscapeHelper.MIN_THINSP));
+        StringEscapeHelper.HTML_ENTITIES.put("thorn", new Integer(StringEscapeHelper.MIN_THORN));
+        StringEscapeHelper.HTML_ENTITIES.put("tilde", new Integer(StringEscapeHelper.MIN_TILDE));
+        StringEscapeHelper.HTML_ENTITIES.put("times", new Integer(StringEscapeHelper.MIN_TIMES));
+        StringEscapeHelper.HTML_ENTITIES.put("trade", new Integer(StringEscapeHelper.MIN_TRADE));
+        StringEscapeHelper.HTML_ENTITIES.put("uacute", new Integer(StringEscapeHelper.MIN_UACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("uarr", new Integer(StringEscapeHelper.MIN_UARR));
+        StringEscapeHelper.HTML_ENTITIES.put("ucirc", new Integer(StringEscapeHelper.MIN_UCIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("ugrave", new Integer(StringEscapeHelper.MIN_UGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("uml", new Integer(StringEscapeHelper.MIN_UML));
+        StringEscapeHelper.HTML_ENTITIES.put("upsih", new Integer(StringEscapeHelper.MIN_UPSIH));
+        StringEscapeHelper.HTML_ENTITIES.put("upsilon", new Integer(StringEscapeHelper.MIN_UPSILON));
+        StringEscapeHelper.HTML_ENTITIES.put("uuml", new Integer(StringEscapeHelper.MIN_UUML));
+        StringEscapeHelper.HTML_ENTITIES.put("weierp", new Integer(StringEscapeHelper.MIN_WEIERP));
+        StringEscapeHelper.HTML_ENTITIES.put("xi", new Integer(StringEscapeHelper.MIN_XI));
+        StringEscapeHelper.HTML_ENTITIES.put("yacute", new Integer(StringEscapeHelper.MIN_YACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("yen", new Integer(StringEscapeHelper.MIN_YEN));
+        StringEscapeHelper.HTML_ENTITIES.put("yuml", new Integer(StringEscapeHelper.MIN_YUML));
+        StringEscapeHelper.HTML_ENTITIES.put("zeta", new Integer(StringEscapeHelper.MIN_ZETA));
+        StringEscapeHelper.HTML_ENTITIES.put("zwj", new Integer(StringEscapeHelper.MIN_ZWJ));
+        StringEscapeHelper.HTML_ENTITIES.put("zwnj", new Integer(StringEscapeHelper.MIN_ZWNJ));
 
-        HTML_ENTITIES.put("Aacute", new Integer(MAJ_AACUTE));
-        HTML_ENTITIES.put("Acirc", new Integer(MAJ_ACIRC));
-        HTML_ENTITIES.put("AElig", new Integer(MAJ_AELIG));
-        HTML_ENTITIES.put("Agrave", new Integer(MAJ_AGRAVE));
-        HTML_ENTITIES.put("Alpha", new Integer(MAJ_ALPHA));
-        HTML_ENTITIES.put("Aring", new Integer(MAJ_ARING));
-        HTML_ENTITIES.put("Atilde", new Integer(MAJ_ATILDE));
-        HTML_ENTITIES.put("Auml", new Integer(MAJ_AUML));
-        HTML_ENTITIES.put("Beta", new Integer(MAJ_BETA));
-        HTML_ENTITIES.put("Ccedil", new Integer(MAJ_CCEDIL));
-        HTML_ENTITIES.put("Chi", new Integer(MAJ_CHI));
-        HTML_ENTITIES.put("Dagger", new Integer(MAJ_DAGGER));
-        HTML_ENTITIES.put("dArr", new Integer(MAJ_DARR));
-        HTML_ENTITIES.put("Delta", new Integer(MAJ_DELTA));
-        HTML_ENTITIES.put("Eacute", new Integer(MAJ_EACUTE));
-        HTML_ENTITIES.put("Ecirc", new Integer(MAJ_ECIRC));
-        HTML_ENTITIES.put("Egrave", new Integer(MAJ_EGRAVE));
-        HTML_ENTITIES.put("Epsilon", new Integer(MAJ_EPSILON));
-        HTML_ENTITIES.put("Eta", new Integer(MAJ_ETA));
-        HTML_ENTITIES.put("ETH", new Integer(MAJ_ETH));
-        HTML_ENTITIES.put("Euml", new Integer(MAJ_EUML));
-        HTML_ENTITIES.put("Gamma", new Integer(MAJ_GAMMA));
-        HTML_ENTITIES.put("hArr", new Integer(MAJ_HARR));
-        HTML_ENTITIES.put("Iacute", new Integer(MAJ_IACUTE));
-        HTML_ENTITIES.put("Icirc", new Integer(MAJ_ICIRC));
-        HTML_ENTITIES.put("Igrave", new Integer(MAJ_IGRAVE));
-        HTML_ENTITIES.put("Iota", new Integer(MAJ_IOTA));
-        HTML_ENTITIES.put("Iuml", new Integer(MAJ_IUML));
-        HTML_ENTITIES.put("Kappa", new Integer(MAJ_KAPPA));
-        HTML_ENTITIES.put("Lambda", new Integer(MAJ_LAMBDA));
-        HTML_ENTITIES.put("lArr", new Integer(MAJ_LARR));
-        HTML_ENTITIES.put("Mu", new Integer(MAJ_MU));
-        HTML_ENTITIES.put("Ntilde", new Integer(MAJ_NTILDE));
-        HTML_ENTITIES.put("Nu", new Integer(MAJ_NU));
-        HTML_ENTITIES.put("Oacute", new Integer(MAJ_OACUTE));
-        HTML_ENTITIES.put("Ocirc", new Integer(MAJ_OCIRC));
-        HTML_ENTITIES.put("OElig", new Integer(MAJ_OELIG));
-        HTML_ENTITIES.put("Ograve", new Integer(MAJ_OGRAVE));
-        HTML_ENTITIES.put("Omega", new Integer(MAJ_OMEGA));
-        HTML_ENTITIES.put("Omicron", new Integer(MAJ_OMICRON));
-        HTML_ENTITIES.put("Oslash", new Integer(MAJ_OSLASH));
-        HTML_ENTITIES.put("Otilde", new Integer(MAJ_OTILDE));
-        HTML_ENTITIES.put("Ouml", new Integer(MAJ_OUML));
-        HTML_ENTITIES.put("Phi", new Integer(MAJ_PHI));
-        HTML_ENTITIES.put("Pi", new Integer(MAJ_PI));
-        HTML_ENTITIES.put("Prime", new Integer(MAJ_PRIME));
-        HTML_ENTITIES.put("Psi", new Integer(MAJ_PSI));
-        HTML_ENTITIES.put("rArr", new Integer(MAJ_RARR));
-        HTML_ENTITIES.put("Rho", new Integer(MAJ_RHO));
-        HTML_ENTITIES.put("Scaron", new Integer(MAJ_SCARON));
-        HTML_ENTITIES.put("Sigma", new Integer(MAJ_SIGMA));
-        HTML_ENTITIES.put("Tau", new Integer(MAJ_TAU));
-        HTML_ENTITIES.put("Theta", new Integer(MAJ_THETA));
-        HTML_ENTITIES.put("THORN", new Integer(MAJ_THORN));
-        HTML_ENTITIES.put("Uacute", new Integer(MAJ_UACUTE));
-        HTML_ENTITIES.put("uArr", new Integer(MAJ_UARR));
-        HTML_ENTITIES.put("Ucirc", new Integer(MAJ_UCIRC));
-        HTML_ENTITIES.put("Ugrave", new Integer(MAJ_UGRAVE));
-        HTML_ENTITIES.put("Upsilon", new Integer(MAJ_UPSILON));
-        HTML_ENTITIES.put("Uuml", new Integer(MAJ_UUML));
-        HTML_ENTITIES.put("Xi", new Integer(MAJ_XI));
-        HTML_ENTITIES.put("Yacute", new Integer(MAJ_YACUTE));
-        HTML_ENTITIES.put("Yuml", new Integer(MAJ_YUML));
-        HTML_ENTITIES.put("Zeta", new Integer(MAJ_ZETA));
+        StringEscapeHelper.HTML_ENTITIES.put("Aacute", new Integer(StringEscapeHelper.MAJ_AACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("Acirc", new Integer(StringEscapeHelper.MAJ_ACIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("AElig", new Integer(StringEscapeHelper.MAJ_AELIG));
+        StringEscapeHelper.HTML_ENTITIES.put("Agrave", new Integer(StringEscapeHelper.MAJ_AGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("Alpha", new Integer(StringEscapeHelper.MAJ_ALPHA));
+        StringEscapeHelper.HTML_ENTITIES.put("Aring", new Integer(StringEscapeHelper.MAJ_ARING));
+        StringEscapeHelper.HTML_ENTITIES.put("Atilde", new Integer(StringEscapeHelper.MAJ_ATILDE));
+        StringEscapeHelper.HTML_ENTITIES.put("Auml", new Integer(StringEscapeHelper.MAJ_AUML));
+        StringEscapeHelper.HTML_ENTITIES.put("Beta", new Integer(StringEscapeHelper.MAJ_BETA));
+        StringEscapeHelper.HTML_ENTITIES.put("Ccedil", new Integer(StringEscapeHelper.MAJ_CCEDIL));
+        StringEscapeHelper.HTML_ENTITIES.put("Chi", new Integer(StringEscapeHelper.MAJ_CHI));
+        StringEscapeHelper.HTML_ENTITIES.put("Dagger", new Integer(StringEscapeHelper.MAJ_DAGGER));
+        StringEscapeHelper.HTML_ENTITIES.put("dArr", new Integer(StringEscapeHelper.MAJ_DARR));
+        StringEscapeHelper.HTML_ENTITIES.put("Delta", new Integer(StringEscapeHelper.MAJ_DELTA));
+        StringEscapeHelper.HTML_ENTITIES.put("Eacute", new Integer(StringEscapeHelper.MAJ_EACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("Ecirc", new Integer(StringEscapeHelper.MAJ_ECIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("Egrave", new Integer(StringEscapeHelper.MAJ_EGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("Epsilon", new Integer(StringEscapeHelper.MAJ_EPSILON));
+        StringEscapeHelper.HTML_ENTITIES.put("Eta", new Integer(StringEscapeHelper.MAJ_ETA));
+        StringEscapeHelper.HTML_ENTITIES.put("ETH", new Integer(StringEscapeHelper.MAJ_ETH));
+        StringEscapeHelper.HTML_ENTITIES.put("Euml", new Integer(StringEscapeHelper.MAJ_EUML));
+        StringEscapeHelper.HTML_ENTITIES.put("Gamma", new Integer(StringEscapeHelper.MAJ_GAMMA));
+        StringEscapeHelper.HTML_ENTITIES.put("hArr", new Integer(StringEscapeHelper.MAJ_HARR));
+        StringEscapeHelper.HTML_ENTITIES.put("Iacute", new Integer(StringEscapeHelper.MAJ_IACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("Icirc", new Integer(StringEscapeHelper.MAJ_ICIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("Igrave", new Integer(StringEscapeHelper.MAJ_IGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("Iota", new Integer(StringEscapeHelper.MAJ_IOTA));
+        StringEscapeHelper.HTML_ENTITIES.put("Iuml", new Integer(StringEscapeHelper.MAJ_IUML));
+        StringEscapeHelper.HTML_ENTITIES.put("Kappa", new Integer(StringEscapeHelper.MAJ_KAPPA));
+        StringEscapeHelper.HTML_ENTITIES.put("Lambda", new Integer(StringEscapeHelper.MAJ_LAMBDA));
+        StringEscapeHelper.HTML_ENTITIES.put("lArr", new Integer(StringEscapeHelper.MAJ_LARR));
+        StringEscapeHelper.HTML_ENTITIES.put("Mu", new Integer(StringEscapeHelper.MAJ_MU));
+        StringEscapeHelper.HTML_ENTITIES.put("Ntilde", new Integer(StringEscapeHelper.MAJ_NTILDE));
+        StringEscapeHelper.HTML_ENTITIES.put("Nu", new Integer(StringEscapeHelper.MAJ_NU));
+        StringEscapeHelper.HTML_ENTITIES.put("Oacute", new Integer(StringEscapeHelper.MAJ_OACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("Ocirc", new Integer(StringEscapeHelper.MAJ_OCIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("OElig", new Integer(StringEscapeHelper.MAJ_OELIG));
+        StringEscapeHelper.HTML_ENTITIES.put("Ograve", new Integer(StringEscapeHelper.MAJ_OGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("Omega", new Integer(StringEscapeHelper.MAJ_OMEGA));
+        StringEscapeHelper.HTML_ENTITIES.put("Omicron", new Integer(StringEscapeHelper.MAJ_OMICRON));
+        StringEscapeHelper.HTML_ENTITIES.put("Oslash", new Integer(StringEscapeHelper.MAJ_OSLASH));
+        StringEscapeHelper.HTML_ENTITIES.put("Otilde", new Integer(StringEscapeHelper.MAJ_OTILDE));
+        StringEscapeHelper.HTML_ENTITIES.put("Ouml", new Integer(StringEscapeHelper.MAJ_OUML));
+        StringEscapeHelper.HTML_ENTITIES.put("Phi", new Integer(StringEscapeHelper.MAJ_PHI));
+        StringEscapeHelper.HTML_ENTITIES.put("Pi", new Integer(StringEscapeHelper.MAJ_PI));
+        StringEscapeHelper.HTML_ENTITIES.put("Prime", new Integer(StringEscapeHelper.MAJ_PRIME));
+        StringEscapeHelper.HTML_ENTITIES.put("Psi", new Integer(StringEscapeHelper.MAJ_PSI));
+        StringEscapeHelper.HTML_ENTITIES.put("rArr", new Integer(StringEscapeHelper.MAJ_RARR));
+        StringEscapeHelper.HTML_ENTITIES.put("Rho", new Integer(StringEscapeHelper.MAJ_RHO));
+        StringEscapeHelper.HTML_ENTITIES.put("Scaron", new Integer(StringEscapeHelper.MAJ_SCARON));
+        StringEscapeHelper.HTML_ENTITIES.put("Sigma", new Integer(StringEscapeHelper.MAJ_SIGMA));
+        StringEscapeHelper.HTML_ENTITIES.put("Tau", new Integer(StringEscapeHelper.MAJ_TAU));
+        StringEscapeHelper.HTML_ENTITIES.put("Theta", new Integer(StringEscapeHelper.MAJ_THETA));
+        StringEscapeHelper.HTML_ENTITIES.put("THORN", new Integer(StringEscapeHelper.MAJ_THORN));
+        StringEscapeHelper.HTML_ENTITIES.put("Uacute", new Integer(StringEscapeHelper.MAJ_UACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("uArr", new Integer(StringEscapeHelper.MAJ_UARR));
+        StringEscapeHelper.HTML_ENTITIES.put("Ucirc", new Integer(StringEscapeHelper.MAJ_UCIRC));
+        StringEscapeHelper.HTML_ENTITIES.put("Ugrave", new Integer(StringEscapeHelper.MAJ_UGRAVE));
+        StringEscapeHelper.HTML_ENTITIES.put("Upsilon", new Integer(StringEscapeHelper.MAJ_UPSILON));
+        StringEscapeHelper.HTML_ENTITIES.put("Uuml", new Integer(StringEscapeHelper.MAJ_UUML));
+        StringEscapeHelper.HTML_ENTITIES.put("Xi", new Integer(StringEscapeHelper.MAJ_XI));
+        StringEscapeHelper.HTML_ENTITIES.put("Yacute", new Integer(StringEscapeHelper.MAJ_YACUTE));
+        StringEscapeHelper.HTML_ENTITIES.put("Yuml", new Integer(StringEscapeHelper.MAJ_YUML));
+        StringEscapeHelper.HTML_ENTITIES.put("Zeta", new Integer(StringEscapeHelper.MAJ_ZETA));
     }
 
     /**
@@ -1168,10 +1236,10 @@ public final class StringEscapeHelper {
                 String escape = s.substring(ampInd + 1, nextSemi);
                 try {
                     if (escape.startsWith("#")) {
-                        value = Integer.parseInt(escape.substring(1), RADIX);
+                        value = Integer.parseInt(escape.substring(1), StringEscapeHelper.RADIX);
                     } else {
-                        if (HTML_ENTITIES.containsKey(escape)) {
-                            value = ((Integer) HTML_ENTITIES.get(escape)).intValue();
+                        if (StringEscapeHelper.HTML_ENTITIES.containsKey(escape)) {
+                            value = ((Integer) StringEscapeHelper.HTML_ENTITIES.get(escape)).intValue();
                         }
                     }
                 } catch (NumberFormatException ex) {
@@ -1179,7 +1247,7 @@ public final class StringEscapeHelper {
                 }
                 result.append(s.substring(lastEnd, ampInd));
                 lastEnd = nextSemi + 1;
-                if (value >= 0 && value <= MASK) {
+                if (value >= 0 && value <= StringEscapeHelper.MASK) {
                     result.append((char) value);
                 } else {
                     result.append("&").append(escape).append(";");
@@ -1198,8 +1266,8 @@ public final class StringEscapeHelper {
      * @return unescaped String.
      */
     public static String unescapeXML(final String s) {
-        return unescapeHTML(s);
-}
+        return StringEscapeHelper.unescapeHTML(s);
+    }
 
     /**
      * Escape Double quotes.
@@ -1222,23 +1290,23 @@ public final class StringEscapeHelper {
         for (int i = 0; i < length; ++i) {
             char c = s.charAt(i);
             switch (c) {
-                case '<':
-                    newLength += "&lt".length();
-                    break;
-                case '>':
-                    newLength += "&gt".length();
-                    break;
-                case '&':
-                    newLength += "&amp".length();
-                    break;
-                case '\'':
-                    newLength += "&apos".length();
-                    break;
-                case '\"':
-                    newLength += "&quot".length();
-                    break;
-                default:
-                    break;
+            case '<':
+                newLength += "&lt".length();
+                break;
+            case '>':
+                newLength += "&gt".length();
+                break;
+            case '&':
+                newLength += "&amp".length();
+                break;
+            case '\'':
+                newLength += "&apos".length();
+                break;
+            case '\"':
+                newLength += "&quot".length();
+                break;
+            default:
+                break;
             }
         }
         if (length == newLength) {
@@ -1249,36 +1317,36 @@ public final class StringEscapeHelper {
         for (int i = 0; i < length; ++i) {
             char c = s.charAt(i);
             switch (c) {
-                case '\'':
-                    sb.append("&apos;");
-                    break;
-                case '\"':
-                    sb.append("&quot;");
-                    break;
-                case '<':
-                    sb.append("&lt;");
-                    break;
-                case '>':
-                    sb.append("&gt;");
-                    break;
-                case '&':
-                    sb.append("&amp;");
-                    break;
-                default:
-                    int cint = MASK & c;
-                    if (cint < CHAR) {
-                        switch (c) {
-                            case '\r':
-                            case '\n':
-                            case '\t':
-                            case '\f':
-                                sb.append(c);
-                                break;
-                            default:
-                        }
-                    } else {
+            case '\'':
+                sb.append("&apos;");
+                break;
+            case '\"':
+                sb.append("&quot;");
+                break;
+            case '<':
+                sb.append("&lt;");
+                break;
+            case '>':
+                sb.append("&gt;");
+                break;
+            case '&':
+                sb.append("&amp;");
+                break;
+            default:
+                int cint = StringEscapeHelper.MASK & c;
+                if (cint < StringEscapeHelper.CHAR) {
+                    switch (c) {
+                    case '\r':
+                    case '\n':
+                    case '\t':
+                    case '\f':
                         sb.append(c);
+                        break;
+                    default:
                     }
+                } else {
+                    sb.append(c);
+                }
             }
         }
         return sb.toString();

@@ -7,7 +7,6 @@ import java.util.List;
 import net.dromard.common.visitable.Visitable;
 import net.dromard.common.visitable.Visitor;
 
-
 /**
  * TreeNode implementation.
  * <br>
@@ -85,8 +84,8 @@ public class TreeNode implements Visitable {
         int size = 1; // me !
 
         // plus my children.
-        if (this.childs != null && this.childs.size() > 0) {
-            Iterator<? extends TreeNode> children = this.childs.iterator();
+        if (childs != null && childs.size() > 0) {
+            Iterator<? extends TreeNode> children = childs.iterator();
             while (children.hasNext()) {
                 TreeNode child = children.next();
                 size += child.size();
@@ -130,7 +129,8 @@ public class TreeNode implements Visitable {
      */
     public final void addChild(final TreeNode child) {
         child.setParent(this);
-        if (childs == null) childs = new ArrayList<TreeNode>();
+        if (childs == null)
+            childs = new ArrayList<TreeNode>();
         childs.add(child);
     }
 

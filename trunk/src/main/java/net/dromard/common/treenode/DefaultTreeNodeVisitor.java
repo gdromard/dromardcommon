@@ -1,7 +1,5 @@
 package net.dromard.common.treenode;
 
-import java.util.Iterator;
-
 import net.dromard.common.visitable.Visitor;
 
 /**
@@ -23,9 +21,9 @@ public abstract class DefaultTreeNodeVisitor implements Visitor {
         }
 
         if (((TreeNode) node).getChild() != null) {
-	        for (Iterator<TreeNode> i = ((TreeNode) node).getChild().iterator(); i.hasNext();) {
-	            i.next().accept(this);
-	        }
+            for (TreeNode treeNode : ((TreeNode) node).getChild()) {
+                treeNode.accept(this);
+            }
         }
     }
 }

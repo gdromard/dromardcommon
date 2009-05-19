@@ -1,7 +1,17 @@
 package net.dromard.common.swing;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import javax.swing.JDesktopPane;
+import javax.swing.JInternalFrame;
 
 /**
  * @author Gabriel Dromard
@@ -9,6 +19,7 @@ import javax.swing.*;
  */
 public class JImageDesktopPane extends JDesktopPane {
 	private Image backgroundImage;
+	private boolean scale = false;
 
 	/**
 	 * Recupération de l'image de fond du composant
@@ -27,12 +38,45 @@ public class JImageDesktopPane extends JDesktopPane {
 	 * @param g Composant graphique
 	 */
 	public void paintComponent(Graphics g) {
-		if(backgroundImage != null) {
+		if (backgroundImage != null) {
 			// Centrer l'image
 			Dimension paneSize = this.getSize();
 			Dimension imageSize = new Dimension(backgroundImage.getWidth(this), backgroundImage.getHeight(this));
-
-			g.drawImage(backgroundImage, (paneSize.width - imageSize.width) / 2, (paneSize.height - imageSize.height) / 2, this);
+			if (imageSize.width > paneSize.width || imageSize.height > paneSize.height) {
+				if (scale) {
+					Graphics2D g2d = (Graphics2D) g;
+					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING , RenderingHints.VALUE_ANTIALIAS_ON);
+					AffineTransform af = new AffineTransform();
+					// Get scale to map into container
+					double scaleX = (double) getWidth() / (imageSize.width);
+					double scaleY = (double) getHeight() / (imageSize.height);
+					af.scale(scaleX, scaleY);
+					BufferedImage temp = new BufferedImage((int) (imageSize.width*scaleX), (int) (imageSize.height*scaleY), BufferedImage.TYPE_INT_RGB);
+					((Graphics2D) temp.getGraphics()).drawImage(backgroundImage, af, null);
+					g.drawImage(temp, 0, 0, this);
+				} else {
+					Graphics2D g2d = (Graphics2D) g;
+					g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING , RenderingHints.VALUE_ANTIALIAS_ON);
+					AffineTransform af = new AffineTransform();
+					// Keep original ratio
+					double ratio = (double) imageSize.width / imageSize.height;
+					// Get scale to map into container
+					double scaleX = (double) getWidth() / (imageSize.width);
+					double scaleY = (double) getHeight() / (imageSize.height);
+					
+					// Scale the AffineTransform so as to paint the wanted image into container
+					if (getWidth()*1.0/getHeight()*1.0 > ratio) {
+						scaleX = scaleY;
+					}
+					af.scale(scaleX, scaleX);
+	
+					BufferedImage temp = new BufferedImage((int) (imageSize.width*scaleX), (int) (imageSize.height*scaleX), BufferedImage.TYPE_INT_RGB);
+					((Graphics2D) temp.getGraphics()).drawImage(backgroundImage, af, null);
+					g.drawImage(temp, (paneSize.width - temp.getWidth()) / 2, (paneSize.height - temp.getHeight()) / 2, this);
+				}
+			} else {
+				g.drawImage(backgroundImage, (paneSize.width - imageSize.width) / 2, (paneSize.height - imageSize.height) / 2, this);
+			}
 		}
 	}
 

@@ -5,12 +5,13 @@ package net.dromard.common.junit;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Set;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 import net.dromard.common.templating.reflect.Formatter;
 import net.dromard.common.templating.reflect.ReflectTemplateTransformer;
+import net.dromard.common.util.ObjectComparator;
 
 /**
  * This class manage transformation with pattern $(parameter}.<br>
@@ -46,16 +47,16 @@ public class ReflectTemplateTransfomerTest extends TestCase {
                 }
                 if (object instanceof InternalTest) {
                     return ReflectTemplateTransformer.transformUsingReflection(internalGstring, object, new Formatter() {
-                    	public String format(Object object) {
-                    		return object.toString();
-                    	}
+                        public String format(final Object object) {
+                            return object.toString();
+                        }
                     });
                 }
                 return object.toString();
             }
         });
         System.out.println(transformed);
-        assertEquals(result, transformed);
+        Assert.assertEquals(result, transformed);
     }
 
     /**
@@ -71,24 +72,45 @@ public class ReflectTemplateTransfomerTest extends TestCase {
 
         Object bean = new Test();
         String transformed = ReflectTemplateTransformer.transformUsingReflection(gstring, bean, new Formatter() {
-        	public String format(Object object) {
-        		return object.toString();
-        	}
+            public String format(final Object object) {
+                return object.toString();
+            }
         });
         System.out.println(transformed);
-        assertEquals(result, transformed);
+        Assert.assertEquals(result, transformed);
+    }
+
+    public void testObjectComparator() throws Exception {
+        Assert.assertTrue(ObjectComparator.equals(new Test(), new Test()));
+        Assert.assertFalse(ObjectComparator.equals(new Test(), new InternalTest()));
     }
 }
 
 class Test {
-    public String getUn() { return "Un"; }
-    public String getTest() { return "Test"; }
-    public String getVerifier() { return "Verifier"; }
-    public String getExtraction() { return "Extraction"; }
-    public String getChamps() { return "Champs"; }
+    public String getUn() {
+        return "Un";
+    }
+
+    public String getTest() {
+        return "Test";
+    }
+
+    public String getVerifier() {
+        return "Verifier";
+    }
+
+    public String getExtraction() {
+        return "Extraction";
+    }
+
+    public String getChamps() {
+        return "Champs";
+    }
+
     public InternalTest getInternalTest() {
         return new InternalTest();
     }
+
     public Set getInternalTests() {
         Set set = new HashSet();
         set.add(new InternalTest());
@@ -98,20 +120,49 @@ class Test {
 }
 
 class InternalTest {
-    public String getUn() { return "UN"; }
-    public String getTest() { return "TEST"; }
-    public String getVerifier() { return "VERIFIER"; }
-    public String getExtraction() { return "EXTRACTION"; }
-    public String getChamps() { return "CHAMPS"; }
+    public String getUn() {
+        return "UN";
+    }
+
+    public String getTest() {
+        return "TEST";
+    }
+
+    public String getVerifier() {
+        return "VERIFIER";
+    }
+
+    public String getExtraction() {
+        return "EXTRACTION";
+    }
+
+    public String getChamps() {
+        return "CHAMPS";
+    }
+
     public SubInternalTest getSubInternalTest() {
         return new SubInternalTest();
     }
 }
 
 class SubInternalTest {
-    public String getUn() { return "1"; }
-    public String getTest() { return "2"; }
-    public String getVerifier() { return "3"; }
-    public String getExtraction() { return "4"; }
-    public String getChamps() { return "5"; }
+    public String getUn() {
+        return "1";
+    }
+
+    public String getTest() {
+        return "2";
+    }
+
+    public String getVerifier() {
+        return "3";
+    }
+
+    public String getExtraction() {
+        return "4";
+    }
+
+    public String getChamps() {
+        return "5";
+    }
 }
