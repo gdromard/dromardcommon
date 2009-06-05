@@ -7,7 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.plaf.ComponentUI;
 
 import sun.swing.SwingUtilities2;
-import sun.swing.SwingUtilities2.AATextInfo;
+
 
 public class WaveButton extends JButton {
 	private static final long serialVersionUID = -1624555226686846386L;
@@ -18,7 +18,7 @@ public class WaveButton extends JButton {
         ComponentUI ui = WaveButtonUI.createUI(this);
         setUI(ui);
         setBackground(new Color(183, 234, 98));
-        putClientProperty(SwingUtilities2.AA_TEXT_PROPERTY_KEY, AATextInfo.getAATextInfo(true));
+        putClientProperty(SwingUtilities2.AA_TEXT_PROPERTY_KEY, new Boolean(true));
     }
 
 	public static void main(String[] args) {
