@@ -1,4 +1,4 @@
-package net.dromard.common.ant;
+package net.dromard.ant;
 
 import java.io.File;
 import java.io.FileWriter;
