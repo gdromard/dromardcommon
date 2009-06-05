@@ -37,7 +37,7 @@ public class LDAPConnectionParameters {
      * @return Returns the key_ldapUserEntryDn.
      */
     public String getLdapUserDnEntry(String user) {
-        return properties.getFormatedProperty(key_ldapUserEntryDn, new String[] {user});
+        return properties.getFormattedProperty(key_ldapUserEntryDn, new String[] {user});
     }
     
     /**

@@ -4,8 +4,7 @@
 package net.dromard.common.properties;
 
 import java.text.MessageFormat;
-import java.util.Iterator;
-import java.util.Properties;
+import java.util.MissingResourceException;
 
 import net.dromard.common.util.StringHelper;
 
@@ -47,7 +46,7 @@ import net.dromard.common.util.StringHelper;
  * </li>
  * </ul>
  */
-public class DynamicProperties extends Properties {
+public class DynamicProperties extends AdvancedProperties {
 
     /** serial UID. */
     private static final long serialVersionUID = -181417557219172496L;
@@ -60,24 +59,48 @@ public class DynamicProperties extends Properties {
     }
 
     /**
-     * Retreive a property.
+     * Retrieve a property.
      * @see java.util.Properties#getProperty(java.lang.String)
      * @param key the property key.
      * @return The property value (if it exists)
      */
+    @Override
     public final String getProperty(final String key) {
         return transform(super.getProperty(key));
     }
 
     /**
-     * Retreive a property using a formater.
+     * Retrieve a property value.
+     * @param name The property name
+     * @param defaultValue The default value to be used if no values has been found.
+     * @return The property value
+     */
+    @Override
+    public String getProperty(final String key, final String defaultValue) {
+        String value = null;
+        try {
+            value = super.getProperty(key);
+            if (value == null) {
+                value = defaultValue;
+            } else {
+                value = transform(value);
+            }
+        } catch (MissingResourceException e) {
+            value = defaultValue;
+        }
+        return value;
+    }
+
+    /**
+     * Retrieve a property using a formatter.
      * @see java.util.Properties#getProperty(java.lang.String)
      * @see java.text.MessageFormat#format(java.lang.String, java.lang.Object[])
      * @param key       The property key.
      * @param arguments The MessageFormat arguments.
      * @return The property value formated.
      */
-    public final String getFormatedProperty(final String key, final Object[] arguments) {
+    @Override
+    public final String getFormattedProperty(final String key, final Object[] arguments) {
         return MessageFormat.format(transform(super.getProperty(key)), arguments);
     }
 
@@ -104,9 +127,9 @@ public class DynamicProperties extends Properties {
         if (propertyValue != null) {
             while (result.indexOf("$(") != -1) {
                 String intermediateResult = result;
-                for (Iterator iter = this.keySet().iterator(); iter.hasNext();) {
-                    String key = iter.next().toString();
-                    String value = this.get(key).toString();
+                for (Object element : keySet()) {
+                    String key = element.toString();
+                    String value = get(key).toString();
                     if (!propertyValue.equals(value)) {
                         result = StringHelper.replaceAll(result, "$(" + key.toString() + ")", value);
                     }
@@ -118,9 +141,9 @@ public class DynamicProperties extends Properties {
             }
             while (result.indexOf("${") != -1) {
                 String intermediateResult = result;
-                for (Iterator iter = this.keySet().iterator(); iter.hasNext();) {
-                    String key = iter.next().toString();
-                    String value = this.get(key).toString();
+                for (Object element : keySet()) {
+                    String key = element.toString();
+                    String value = get(key).toString();
                     if (!propertyValue.equals(value)) {
                         result = StringHelper.replaceAll(result, "${" + key.toString() + "}", value);
                     }
@@ -132,5 +155,35 @@ public class DynamicProperties extends Properties {
             }
         }
         return result;
+    }
+
+    public Boolean getPropertyAsBoolean(final String key) {
+        String value = getProperty(key);
+        return (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("1"));
+    }
+
+    public Character getPropertyAsCharacter(final String key) {
+        String value = getProperty(key);
+        return value.toCharArray()[0];
+    }
+
+    public Short getPropertyAsShort(final String key) {
+        return Short.parseShort(getProperty(key));
+    }
+
+    public Integer getPropertyAsInteger(final String key) {
+        return Integer.parseInt(getProperty(key));
+    }
+
+    public Long getPropertyAsLong(final String key) {
+        return Long.parseLong(getProperty(key));
+    }
+
+    public Float getPropertyAsFloat(final String key) {
+        return Float.parseFloat(getProperty(key));
+    }
+
+    public Double getPropertyAsDouble(final String key) {
+        return Double.parseDouble(getProperty(key));
     }
 }

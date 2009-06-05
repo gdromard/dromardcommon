@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -64,10 +63,10 @@ public final class ReflectHelper {
     public static final String BOOLEAN_GETTER = "is";
 
     /** Cache getters. Method object hashed by fieldName hashed by class object. */
-    public static final Map GETTER_CACHE = new SoftHashtable();
+    public static final SoftHashtable GETTER_CACHE = new SoftHashtable();
 
     /** Cache methods. Method object hashed by fieldName hashed by class object. */
-    public static final Map METHODS_CACHE = new SoftHashtable();
+    public static final SoftHashtable METHODS_CACHE = new SoftHashtable();
 
     /**
      * Instantiate a Class using its name.
@@ -107,7 +106,7 @@ public final class ReflectHelper {
             types[i] = arguments[i].getClass();
         }
         // Instantiate class
-        return newInstance(clazz, arguments, types);
+        return ReflectHelper.newInstance(clazz, arguments, types);
     }
 
     /**
@@ -123,7 +122,7 @@ public final class ReflectHelper {
     public static Object newInstance(final String className) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
         // Retrieve class to be load
         Class<?> clazz = Class.forName(className);
-        return newInstance(clazz, new Object[] {});
+        return ReflectHelper.newInstance(clazz, new Object[] {});
     }
 
     /**
@@ -137,7 +136,7 @@ public final class ReflectHelper {
      * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object newInstance(final Class clazz) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-        return newInstance(clazz, new Object[] {});
+        return ReflectHelper.newInstance(clazz, new Object[] {});
     }
 
     /**
@@ -154,21 +153,21 @@ public final class ReflectHelper {
     public static Object invokeMethod(final Object object, final String methodName, final Object[] arguments, final Class[] types) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         try {
             Class beanClass = object.getClass();
-            Map methods = getCachedMethods(beanClass);
+            SoftHashtable methods = ReflectHelper.getCachedMethods(beanClass);
             Method getter = (Method) methods.get(methodName);
             if (getter == null) {
-                getter = getMethod(beanClass, methodName, types);
+                getter = ReflectHelper.getMethod(beanClass, methodName, types);
                 methods.put(methodName, getter);
             }
             return getter.invoke(object, arguments);
         } catch (NoSuchMethodException ex) {
-            NoSuchMethodException thrown = new NoSuchMethodException(formatInvokeGetterException(ex, object, methodName, arguments));
+            NoSuchMethodException thrown = new NoSuchMethodException(ReflectHelper.formatInvokeGetterException(ex, object, methodName, arguments));
             thrown.setStackTrace(ex.getStackTrace());
             throw thrown;
         } catch (InvocationTargetException ex) {
-            throw new InvocationTargetException(ex.getTargetException(), formatInvokeGetterException(ex.getTargetException(), object, methodName, arguments));
+            throw new InvocationTargetException(ex.getTargetException(), ReflectHelper.formatInvokeGetterException(ex.getTargetException(), object, methodName, arguments));
         } catch (IllegalAccessException ex) {
-            IllegalAccessException thrown = new IllegalAccessException(formatInvokeGetterException(ex, object, methodName, arguments));
+            IllegalAccessException thrown = new IllegalAccessException(ReflectHelper.formatInvokeGetterException(ex, object, methodName, arguments));
             thrown.setStackTrace(ex.getStackTrace());
             throw thrown;
         }
@@ -199,10 +198,10 @@ public final class ReflectHelper {
      * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object invokeStaticMethod(final Class clazz, final String methodName, final Object[] arguments, final Class[] types) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Map methods = getCachedMethods(clazz);
+        SoftHashtable methods = ReflectHelper.getCachedMethods(clazz);
         Method getter = (Method) methods.get(methodName);
         if (getter == null) {
-            getter = getMethod(clazz, methodName, types);
+            getter = ReflectHelper.getMethod(clazz, methodName, types);
             methods.put(methodName, getter);
         }
         return getter.invoke(null, arguments);
@@ -224,7 +223,7 @@ public final class ReflectHelper {
         for (int i = 0; i < arguments.length; ++i) {
             types[i] = arguments[i].getClass();
         }
-        return invokeMethod(object, methodName, arguments, types);
+        return ReflectHelper.invokeMethod(object, methodName, arguments, types);
     }
 
     /**
@@ -239,7 +238,7 @@ public final class ReflectHelper {
      * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static void invokeSetter(final Object toFill, final String fieldName, final Object valueToSet, final Class valueToSetType) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        invokeMethod(toFill, computeAccessorMethodName(SETTER, fieldName), new Object[] {valueToSet}, new Class[] {valueToSetType});
+        ReflectHelper.invokeMethod(toFill, ReflectHelper.computeAccessorMethodName(ReflectHelper.SETTER, fieldName), new Object[] { valueToSet }, new Class[] { valueToSetType });
     }
 
     /**
@@ -255,14 +254,14 @@ public final class ReflectHelper {
     public static Object invokeGetter(final Object bean, final String fieldName) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         // Retrieve
         Class beanClass = bean.getClass();
-        Map getters = getCachedGetters(beanClass);
+        SoftHashtable getters = ReflectHelper.getCachedGetters(beanClass);
         Method getter = (Method) getters.get(fieldName);
         if (getter == null) {
             try {
-                getter = getMethod(beanClass, computeAccessorMethodName(GETTER, fieldName), new Class[] {});
+                getter = ReflectHelper.getMethod(beanClass, ReflectHelper.computeAccessorMethodName(ReflectHelper.GETTER, fieldName), new Class[] {});
             } catch (NoSuchMethodException ex) {
                 try {
-                    getter = getMethod(beanClass, computeAccessorMethodName(BOOLEAN_GETTER, fieldName), new Class[] {});
+                    getter = ReflectHelper.getMethod(beanClass, ReflectHelper.computeAccessorMethodName(ReflectHelper.BOOLEAN_GETTER, fieldName), new Class[] {});
                 } catch (NoSuchMethodException exOnBoolean) {
                     // if throws NoSuchmethodException again, let the original one bubble up.
                     throw ex;
@@ -271,7 +270,7 @@ public final class ReflectHelper {
             getters.put(fieldName, getter);
         }
         // Invoke
-        return invokeMethod(bean, getter, new Object[] {});
+        return ReflectHelper.invokeMethod(bean, getter, new Object[] {});
     }
 
     /**
@@ -279,11 +278,11 @@ public final class ReflectHelper {
      * @param clazz The class
      * @return the cached methods of a class.
      */
-    private static Map getCachedGetters(final Class clazz) {
-        Map getters = (Map) GETTER_CACHE.get(clazz);
+    private static SoftHashtable getCachedGetters(final Class clazz) {
+        SoftHashtable getters = (SoftHashtable) ReflectHelper.GETTER_CACHE.get(clazz);
         if (getters == null) {
             getters = new SoftHashtable();
-            GETTER_CACHE.put(clazz, getters);
+            ReflectHelper.GETTER_CACHE.put(clazz, getters);
         }
         return getters;
     }
@@ -293,11 +292,11 @@ public final class ReflectHelper {
      * @param clazz The class
      * @return the cached methods of a class.
      */
-    private static Map getCachedMethods(final Class clazz) {
-        Map methods = (Map) METHODS_CACHE.get(clazz);
+    private static SoftHashtable getCachedMethods(final Class clazz) {
+        SoftHashtable methods = (SoftHashtable) ReflectHelper.METHODS_CACHE.get(clazz);
         if (methods == null) {
             methods = new SoftHashtable();
-            METHODS_CACHE.put(clazz, methods);
+            ReflectHelper.METHODS_CACHE.put(clazz, methods);
         }
         return methods;
     }
@@ -318,7 +317,7 @@ public final class ReflectHelper {
             if (field.indexOf('[') > -1 && (field.indexOf('.') == -1 || field.indexOf('.') > field.indexOf('[')) && (field.indexOf('(') == -1 || field.indexOf('(') > field.indexOf('['))) {
                 if (field.indexOf('[') > 0) {
                     // Invoke getter to retrieve the child element
-                    instance = invokeGetter(instance, field.substring(0, field.indexOf('[')));
+                    instance = ReflectHelper.invokeGetter(instance, field.substring(0, field.indexOf('[')));
                     // If result is null no need to continue
                     if (instance == null) {
                         return null;
@@ -333,35 +332,35 @@ public final class ReflectHelper {
                 }
                 field = field.substring(field.indexOf(']') + 1);
             } else if (field.indexOf('.') > -1 && (field.indexOf('(') == -1 || field.indexOf('(') > field.indexOf('.'))) {
-        // In the case that you want to retrieve in one time the field of a child object
+                // In the case that you want to retrieve in one time the field of a child object
                 if (field.indexOf('.') > 0) {
                     // Invoke getter to retrieve the child element
-            instance = invokeGetter(instance, field.substring(0, field.indexOf('.')));
-            // If result is null no need to continue
-            if (instance == null) {
-                return null;
-            }
+                    instance = ReflectHelper.invokeGetter(instance, field.substring(0, field.indexOf('.')));
+                    // If result is null no need to continue
+                    if (instance == null) {
+                        return null;
+                    }
                 }
                 // Re route field name to retrieve the field of the child instance
-            field = field.substring(field.indexOf('.') + 1);
+                field = field.substring(field.indexOf('.') + 1);
             } else if (field.indexOf('(') > 0) {
                 // Invoke getter to retrieve the child element
-                instance = invokeMethod(instance, field.substring(0, field.indexOf('(')), new Object[] {});
+                instance = ReflectHelper.invokeMethod(instance, field.substring(0, field.indexOf('(')), new Object[] {});
                 // If result is null no need to continue
                 if (instance == null) {
                     return null;
-        }
+                }
                 // Re route field name to retrieve the field of the child instance
                 field = field.substring(field.indexOf(')') + 1);
             }
         }
         if (field.length() == 0) {
             return instance;
-            }
-        if (field.indexOf('.') > -1 || field.indexOf('[') > -1) {
-            return invoke(instance, field);
         }
-        return invokeGetter(instance, field);
+        if (field.indexOf('.') > -1 || field.indexOf('[') > -1) {
+            return ReflectHelper.invoke(instance, field);
+        }
+        return ReflectHelper.invokeGetter(instance, field);
     }
 
     /**
@@ -403,10 +402,10 @@ public final class ReflectHelper {
      */
     public static Object getFieldValue(final Object object, final String fieldName) throws NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         try {
-            return getField(object.getClass(), fieldName).get(object);
+            return ReflectHelper.getField(object.getClass(), fieldName).get(object);
         } catch (NoSuchFieldException ex) {
             try {
-                return invokeGetter(object, fieldName);
+                return ReflectHelper.invokeGetter(object, fieldName);
             } catch (NoSuchMethodException x) {
                 throw ex;
             }
@@ -423,7 +422,7 @@ public final class ReflectHelper {
      */
     public static void setFieldValue(final Object object, final String fieldName, final Object fieldValue) throws NoSuchFieldException, IllegalAccessException {
         try {
-            getField(object.getClass(), fieldName).set(object, fieldValue);
+            ReflectHelper.getField(object.getClass(), fieldName).set(object, fieldValue);
         } catch (NoSuchFieldException ex) {
             throw ex;
         }
@@ -436,7 +435,7 @@ public final class ReflectHelper {
      * @return The Field object of the given class.
      * @throws NoSuchFieldException Thrown if you try to retrieve a field that does not exist.
      */
-    public static Field getField(final Class clazz, final String fieldName) throws NoSuchFieldException {
+    public static Field getField(final Class<?> clazz, final String fieldName) throws NoSuchFieldException {
         try {
             Field f = clazz.getDeclaredField(fieldName);
             f.setAccessible(true);
@@ -448,7 +447,7 @@ public final class ReflectHelper {
                 throw e;
             }
             // Get the one from parent super class recursivly
-            return getField(clazz.getSuperclass(), fieldName);
+            return ReflectHelper.getField(clazz.getSuperclass(), fieldName);
         }
     }
 
@@ -458,9 +457,9 @@ public final class ReflectHelper {
      * @param clazz The class on which to retrieve the fields.
      * @return All the fields.
      */
-    public static List getDeclaredFields(final Class clazz) {
-        List fields = new ArrayList();
-        Class current = clazz;
+    public static List<Field> getDeclaredFields(final Class<?> clazz) {
+        List<Field> fields = new ArrayList<Field>();
+        Class<?> current = clazz;
         while (!current.getName().equals(Object.class.getName())) {
             fields.addAll(Arrays.asList(current.getDeclaredFields()));
             current = current.getSuperclass();
@@ -473,14 +472,14 @@ public final class ReflectHelper {
      * @param clazz The class on which to retrieve the getters.
      * @return All the methods.
      */
-    public static List getGetters(final Class clazz) {
-        List getters = new ArrayList();
+    public static List<Method> getGetters(final Class<?> clazz) {
+        List<Method> getters = new ArrayList<Method>();
         if (clazz != null) {
             Method[] methods = clazz.getMethods();
-            for (int i = 0; i < methods.length; i++) {
-                if (methods[i].getDeclaringClass().equals(clazz)) {
-                    if ((methods[i].getName().startsWith(GETTER) || methods[i].getName().startsWith(BOOLEAN_GETTER)) && methods[i].getParameterTypes().length == 0) {
-                        getters.add(methods[i]);
+            for (Method method : methods) {
+                if (method.getDeclaringClass().equals(clazz)) {
+                    if ((method.getName().startsWith(ReflectHelper.GETTER) || method.getName().startsWith(ReflectHelper.BOOLEAN_GETTER)) && method.getParameterTypes().length == 0) {
+                        getters.add(method);
                     }
                 }
             }
@@ -493,16 +492,16 @@ public final class ReflectHelper {
      * @param clazz The class on which to retrieve the getters.
      * @return All the methods.
      */
-    public static List getGettersRecursivly(final Class clazz) {
-        List getters = new ArrayList();
+    public static List<Method> getGettersRecursivly(final Class<?> clazz) {
+        List<Method> getters = new ArrayList<Method>();
         if (clazz != null) {
-            Class current = clazz;
+            Class<?> current = clazz;
             while (!current.getName().equals(Object.class.getName())) {
                 Method[] methods = current.getMethods();
-                for (int i = 0; i < methods.length; i++) {
-                    if (methods[i].getDeclaringClass().equals(current)) {
-                        if ((methods[i].getName().startsWith(GETTER) || methods[i].getName().startsWith(BOOLEAN_GETTER)) && methods[i].getParameterTypes().length == 0) {
-                            getters.add(methods[i]);
+                for (Method method : methods) {
+                    if (method.getDeclaringClass().equals(current)) {
+                        if ((method.getName().startsWith(ReflectHelper.GETTER) || method.getName().startsWith(ReflectHelper.BOOLEAN_GETTER)) && method.getParameterTypes().length == 0) {
+                            getters.add(method);
                         }
                     }
                 }
@@ -517,14 +516,14 @@ public final class ReflectHelper {
      * @param clazz The class on which to retrieve the getters.
      * @return All the methods.
      */
-    public static List getSetters(final Class clazz) {
-        List getters = new ArrayList();
+    public static List<Method> getSetters(final Class<?> clazz) {
+        List<Method> getters = new ArrayList<Method>();
         if (clazz != null) {
             Method[] methods = clazz.getMethods();
-            for (int i = 0; i < methods.length; i++) {
-                if (methods[i].getDeclaringClass().equals(clazz)) {
-                    if (methods[i].getName().startsWith(SETTER) && methods[i].getName().length() > SETTER.length() && methods[i].getParameterTypes().length == 1) {
-                        getters.add(methods[i]);
+            for (Method method : methods) {
+                if (method.getDeclaringClass().equals(clazz)) {
+                    if (method.getName().startsWith(ReflectHelper.SETTER) && method.getName().length() > ReflectHelper.SETTER.length() && method.getParameterTypes().length == 1) {
+                        getters.add(method);
                     }
                 }
             }
@@ -537,16 +536,16 @@ public final class ReflectHelper {
      * @param clazz The class on which to retrieve the getters.
      * @return All the methods.
      */
-    public static List getSettersRecursivly(final Class clazz) {
-        List getters = new ArrayList();
+    public static List<Method> getSettersRecursivly(final Class<?> clazz) {
+        List<Method> getters = new ArrayList<Method>();
         if (clazz != null) {
-            Class current = clazz;
+            Class<?> current = clazz;
             while (!current.getName().equals(Object.class.getName())) {
                 Method[] methods = current.getMethods();
-                for (int i = 0; i < methods.length; i++) {
-                    if (methods[i].getDeclaringClass().equals(current)) {
-                        if (methods[i].getName().startsWith(SETTER) && methods[i].getName().length() > SETTER.length() && methods[i].getParameterTypes().length == 1) {
-                            getters.add(methods[i]);
+                for (Method method : methods) {
+                    if (method.getDeclaringClass().equals(current)) {
+                        if (method.getName().startsWith(ReflectHelper.SETTER) && method.getName().length() > ReflectHelper.SETTER.length() && method.getParameterTypes().length == 1) {
+                            getters.add(method);
                         }
                     }
                 }
@@ -564,7 +563,7 @@ public final class ReflectHelper {
      * @return A Method object.
      * @throws NoSuchMethodException Thrown if you try to retrieve a method that does not exist.
      */
-    public static Method getMethod(final Class clazz, final String methodName, final Class[] types) throws NoSuchMethodException {
+    public static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>[] types) throws NoSuchMethodException {
         try {
             Method m = clazz.getDeclaredMethod(methodName, types);
             m.setAccessible(true);
@@ -574,7 +573,7 @@ public final class ReflectHelper {
                 if (clazz == Object.class) {
                     throw x;
                 }
-                return getMethod(clazz.getSuperclass(), methodName, types);
+                return ReflectHelper.getMethod(clazz.getSuperclass(), methodName, types);
             } catch (Exception ex) {
                 throw x;
             }
@@ -589,7 +588,7 @@ public final class ReflectHelper {
      * @throw IllegalArgumentException If the arguments type is not valid.
      */
     private static String computeAccessorMethodName(final String accessorType, final String fieldName) {
-        if (!GETTER.equals(accessorType) && !SETTER.equals(accessorType) && !BOOLEAN_GETTER.equals(accessorType)) {
+        if (!ReflectHelper.GETTER.equals(accessorType) && !ReflectHelper.SETTER.equals(accessorType) && !ReflectHelper.BOOLEAN_GETTER.equals(accessorType)) {
             throw new IllegalArgumentException("Accessor Type : " + accessorType + " isn't correct");
         }
         if (StringHelper.isEmpty(fieldName)) {
@@ -606,12 +605,12 @@ public final class ReflectHelper {
      */
     public static String getFieldName(final Method method) {
         String prefix = null;
-        if (method.getName().startsWith(GETTER)) {
-            prefix = GETTER;
-        } else if (method.getName().startsWith(SETTER)) {
-            prefix = SETTER;
-        } else if (method.getName().startsWith(BOOLEAN_GETTER)) {
-            prefix = BOOLEAN_GETTER;
+        if (method.getName().startsWith(ReflectHelper.GETTER)) {
+            prefix = ReflectHelper.GETTER;
+        } else if (method.getName().startsWith(ReflectHelper.SETTER)) {
+            prefix = ReflectHelper.SETTER;
+        } else if (method.getName().startsWith(ReflectHelper.BOOLEAN_GETTER)) {
+            prefix = ReflectHelper.BOOLEAN_GETTER;
         } else {
             return method.getName();
         }
@@ -622,8 +621,8 @@ public final class ReflectHelper {
         return ("" + method.getName().charAt(prefix.length())).toLowerCase() + method.getName().substring(prefix.length() + 1);
     }
 
-    public static boolean implement(Class<?> clazz, Class<?> father) {
-    	return Arrays.asList(clazz.getInterfaces()).contains(father);
+    public static boolean implement(final Class<?> clazz, final Class<?> father) {
+        return Arrays.asList(clazz.getInterfaces()).contains(father);
     }
 
     /**
@@ -633,68 +632,68 @@ public final class ReflectHelper {
      * @throws ClassNotFoundException No comment !!
      * @throws IOException 
      */
-	public static Set<Class<?>> getClasses(String packageName) throws IOException, ClassNotFoundException {
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		return getClasses(loader, packageName);
-	}
+    public static Set<Class<?>> getClasses(final String packageName) throws IOException, ClassNotFoundException {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return ReflectHelper.getClasses(loader, packageName);
+    }
 
-	private static Set<Class<?>> getClasses(ClassLoader loader, String packageName) throws IOException, ClassNotFoundException {
-		Set<Class<?>> classes = new HashSet<Class<?>>();
-		String path = packageName.replace('.', '/');
-		Enumeration<URL> resources = loader.getResources(path);
-		if (resources != null) {
-			while (resources.hasMoreElements()) {
-				String filePath = resources.nextElement().getFile();
-				// WINDOWS HACK
-				if (filePath.indexOf("%20") > 0)
-					filePath = filePath.replaceAll("%20", " ");
-				if (filePath != null) {
-					if ((filePath.indexOf("!") > 0) & (filePath.indexOf(".jar") > 0)) {
-						String jarPath = filePath.substring(0, filePath.indexOf("!"));
-						classes.addAll(getFromJARFile(jarPath, path));
-					} else {
-						classes.addAll(getFromDirectory(new File(filePath), packageName));
+    private static Set<Class<?>> getClasses(final ClassLoader loader, final String packageName) throws IOException, ClassNotFoundException {
+        Set<Class<?>> classes = new HashSet<Class<?>>();
+        String path = packageName.replace('.', '/');
+        Enumeration<URL> resources = loader.getResources(path);
+        if (resources != null) {
+            while (resources.hasMoreElements()) {
+                String filePath = resources.nextElement().getFile();
+                // WINDOWS HACK
+                if (filePath.indexOf("%20") > 0)
+                    filePath = filePath.replaceAll("%20", " ");
+                if (filePath != null) {
+                    if ((filePath.indexOf("!") > 0) & (filePath.indexOf(".jar") > 0)) {
+                        String jarPath = filePath.substring(0, filePath.indexOf("!"));
+                        classes.addAll(ReflectHelper.getFromJARFile(jarPath, path));
+                    } else {
+                        classes.addAll(ReflectHelper.getFromDirectory(new File(filePath), packageName));
 
-					}
-				}
-			}
-		}
-		return classes;
-	}
+                    }
+                }
+            }
+        }
+        return classes;
+    }
 
-	private static Set<Class<?>> getFromDirectory(File directory, String packageName) throws ClassNotFoundException {
-		Set<Class<?>> classes = new HashSet<Class<?>>();
-		if (directory.exists()) {
-			for (String file : directory.list()) {
-				if (file.endsWith(".class")) {
-					String name = packageName + '.' + stripFilenameExtension(file);
-					Class<?> clazz = Class.forName(name);
-					classes.add(clazz);
-				}
-			}
-		}
-		return classes;
-	}
+    private static Set<Class<?>> getFromDirectory(final File directory, final String packageName) throws ClassNotFoundException {
+        Set<Class<?>> classes = new HashSet<Class<?>>();
+        if (directory.exists()) {
+            for (String file : directory.list()) {
+                if (file.endsWith(".class")) {
+                    String name = packageName + '.' + ReflectHelper.stripFilenameExtension(file);
+                    Class<?> clazz = Class.forName(name);
+                    classes.add(clazz);
+                }
+            }
+        }
+        return classes;
+    }
 
-	private static String stripFilenameExtension(String file) {
-		return file.substring(0, file.lastIndexOf('.'));
-	}
+    private static String stripFilenameExtension(final String file) {
+        return file.substring(0, file.lastIndexOf('.'));
+    }
 
-	private static Set<Class<?>> getFromJARFile(String jarUrl, String packageName) throws FileNotFoundException, IOException, ClassNotFoundException {
-		Set<Class<?>> classes = new HashSet<Class<?>>();
-		JarInputStream jarFile = new JarInputStream(new URL(jarUrl).openStream());
-		JarEntry jarEntry;
-		do {
-			jarEntry = jarFile.getNextJarEntry();
-			if (jarEntry != null) {
-				String className = jarEntry.getName();
-				if (className.endsWith(".class")) {
-					className = stripFilenameExtension(className);
-					if (className.startsWith(packageName))
-						classes.add(Class.forName(className.replace('/', '.')));
-				}
-			}
-		} while (jarEntry != null);
-		return classes;
-	}
+    private static Set<Class<?>> getFromJARFile(final String jarUrl, final String packageName) throws FileNotFoundException, IOException, ClassNotFoundException {
+        Set<Class<?>> classes = new HashSet<Class<?>>();
+        JarInputStream jarFile = new JarInputStream(new URL(jarUrl).openStream());
+        JarEntry jarEntry;
+        do {
+            jarEntry = jarFile.getNextJarEntry();
+            if (jarEntry != null) {
+                String className = jarEntry.getName();
+                if (className.endsWith(".class")) {
+                    className = ReflectHelper.stripFilenameExtension(className);
+                    if (className.startsWith(packageName))
+                        classes.add(Class.forName(className.replace('/', '.')));
+                }
+            }
+        } while (jarEntry != null);
+        return classes;
+    }
 }

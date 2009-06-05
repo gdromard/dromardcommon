@@ -3,8 +3,6 @@
  */
 package net.dromard.web.taglib;
 
-import java.util.Map;
-
 import net.dromard.common.util.SoftHashtable;
 
 /**
@@ -17,14 +15,14 @@ public final class TemplateCacheManager {
     private static final TemplateCacheManager INSTANCE = new TemplateCacheManager();
 
     /** The cache map. */
-    private Map cache;
+    private final SoftHashtable cache;
 
     /**
      * Retreive the singleton instance of manager.
      * @return The singleton instance of manager.
      */
     public static TemplateCacheManager getInstance() {
-        return INSTANCE;
+        return TemplateCacheManager.INSTANCE;
     }
 
     /**
@@ -33,6 +31,7 @@ public final class TemplateCacheManager {
      * @see java.lang.Object#clone()
      * @throws CloneNotSupportedException Always thrown (is is a singleton !)
      */
+    @Override
     public Object clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }
