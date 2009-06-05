@@ -26,7 +26,7 @@ public class Grep {
     public Grep(final File source, final String grepRegexp, final String fileRegexp) throws Exception {
         visitor = new GrepVisitor(grepRegexp, fileRegexp);
         new FileTreeNode(source).accept(visitor);
-        System.out.println("Found " + getNbMatches() + " for '" + grepRegexp + "'");
+        //System.out.println("Found " + getNbMatches() + " for '" + grepRegexp + "'");
     }
 
     /**
@@ -54,6 +54,10 @@ public class Grep {
     private int grep(final File source, final String grepRegexp, final String fileRegexp) throws IOException {
         int count = 0;
         if (fileRegexp == null || source.getName().matches(fileRegexp)) {
+            if (source.getName().equals("Grep.java")) {
+                System.out.println("");
+            }
+
             BufferedReader buf = null;
             try {
                 buf = new BufferedReader(new FileReader(source));
@@ -131,7 +135,15 @@ public class Grep {
         try {
             if (argv.length >= 2 && new File(argv[1]).exists()) {
                 File source = new File(argv[1]);
-                new Grep(source, argv[0], (argv.length == 3 ? argv[2] : null));
+                long start = System.currentTimeMillis();
+                Grep grep = new Grep(source, argv[0], (argv.length == 3 ? argv[2] : null));
+                System.out.println("Grep of '" + argv[0] + "' on folder '" + source.getAbsolutePath() + "'" + (argv.length == 3 ? " with file filter '" + argv[2] + "'" : "") + " Found " + grep.getNbMatches() + " matches in " + (System.currentTimeMillis() - start) + "ms");
+                for (File match : grep.getMatches().keySet()) {
+                    System.out.println("Found " + grep.getMatches().get(match).size() + " in " + match.getAbsolutePath());
+                    for (String found : grep.getMatches().get(match)) {
+                        System.out.println("\t" + found.replaceAll("^[ \\t]*", ""));
+                    }
+                }
             } else {
                 System.out.println("Usage: grep regexp file");
                 System.out.println("       grep regexp folder [file extension regexp filter]");
