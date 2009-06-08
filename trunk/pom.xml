@@ -3,16 +3,15 @@
   <groupId>net.dromard</groupId>
   <artifactId>dromard.common</artifactId>
   <name>dromard.common</name>
-  <version>1.9</version>
+  <version>1.91</version>
   <url>http://code.google.com/p/dromardcommon</url>
   <build>
-    <finalName>dromard.common</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
     </plugins>
@@ -22,7 +21,6 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.novell.ldap</groupId>
@@ -35,14 +33,9 @@
       <version>1.8</version>
     </dependency>
     <dependency>
-      <groupId>ant</groupId>
+      <groupId>org.apache.ant</groupId>
       <artifactId>ant</artifactId>
       <version>1.7.0</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
     </dependency>
     <dependency>
       <groupId>jfree</groupId>
@@ -61,12 +54,6 @@
   			<artifactId>maven-javadoc-plugin</artifactId>
   			<configuration>
   				<source>1.5</source>
-  				<doclet>gr.spinellis.umlgraph.doclet.UmlGraphDoc</doclet>
-				<docletArtifact>
-					<groupId>gr.spinellis</groupId>
-					<artifactId>UmlGraph</artifactId>
-					<version>4.4</version>
-				</docletArtifact>
 				<additionalparam>
 					-inferrel -inferdep -quiet -hide java.*
 					-collpackages java.util.* -qualify
