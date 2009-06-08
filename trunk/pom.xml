@@ -54,6 +54,12 @@
   			<artifactId>maven-javadoc-plugin</artifactId>
   			<configuration>
   				<source>1.5</source>
+  				<doclet>gr.spinellis.umlgraph.doclet.UmlGraphDoc</doclet>
+				<docletArtifact>
+					<groupId>gr.spinellis</groupId>
+					<artifactId>UmlGraph</artifactId>
+					<version>4.4</version>
+				</docletArtifact>
 				<additionalparam>
 					-inferrel -inferdep -quiet -hide java.*
 					-collpackages java.util.* -qualify
