@@ -76,8 +76,9 @@ public final class FileHelper {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuffer buf = new StringBuffer();
         String line;
-        while ((line = reader.readLine()) != null)
+        while ((line = reader.readLine()) != null) {
             buf.append(line + "\n");
+        }
         return buf.toString();
     }
 
@@ -101,8 +102,9 @@ public final class FileHelper {
     public static String getExtension(final String file) {
         if (file != null) {
             int extensionIndex = file.lastIndexOf('.');
-            if (extensionIndex < 0)
+            if (extensionIndex < 0) {
                 return "";
+            }
             String extension = file.substring(extensionIndex + 1).toLowerCase();
             if (extension.indexOf("/") > -1 || extension.indexOf("\\") > -1) {
                 return "";
@@ -164,10 +166,12 @@ public final class FileHelper {
             srcChannel.transferTo(0, srcChannel.size(), dstChannel);
         } finally {
             // Close the channels
-            if (srcChannel != null)
+            if (srcChannel != null) {
                 srcChannel.close();
-            if (dstChannel != null)
+            }
+            if (dstChannel != null) {
                 dstChannel.close();
+            }
         }
     }
 
