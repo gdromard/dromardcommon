@@ -4,8 +4,9 @@
  */
 package net.dromard.common.junit;
 
-import net.dromard.common.util.DateDifference;
+import junit.framework.Assert;
 import junit.framework.TestCase;
+import net.dromard.common.util.DateDifference;
 
 public class DateDifferenceTest extends TestCase {
 
@@ -21,11 +22,11 @@ public class DateDifferenceTest extends TestCase {
      * @testExpectedResult NA
      */
     public void testDateDifference() {
-        long l = 1L; 
-        int[] tests = { 1, 9, 10, 99, 100, 999, 1000, 1000*23, 1000*60, 1000*60*23, 1000*60*60, 1000*60*60*23, 1000*60*60*24, 1000*60*60*24*2  };
-        String[] result = { "00:00:00.001", "00:00:00.009", "00:00:00.010", "00:00:00.099", "00:00:00.100", "00:00:00.999", "00:00:01.000", "00:00:23.000", "00:01:00.000", "00:23:00.000", "01:00:00.000", "23:00:00.000", "1 Day 00:00:00.000", "2 Days 00:00:00.000" };
-        for (int i=0; i<tests.length; i++) {
-            assertEquals(result[i], (new DateDifference(l*tests[i])).getDifference());
+        long l = 1L;
+        int[] tests = { 1, 9, 10, 99, 100, 999, 1000, 1000 * 23, 1000 * 60, 1000 * 60 * 23, 1000 * 60 * 60, 1000 * 60 * 60 * 23, 1000 * 60 * 60 * 24, 1000 * 60 * 60 * 24 * 2 };
+        String[] result = { "1ms", "9ms", "10ms", "99ms", "100ms", "999ms", "1s", "23s", "1 min", "23 min", "1 hour", "23 hours", "1 day", "2 days" };
+        for (int i = 0; i < tests.length; ++i) {
+            Assert.assertEquals(result[i], new DateDifference(l * tests[i]).toString());
         }
     }
 }

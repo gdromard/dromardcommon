@@ -279,6 +279,7 @@ public final class StringHelper {
      * @return A string array.
      * @deprecated This implementation does not return an empty element if 2 delimiters are join
      */
+    @Deprecated
     public static String[] normalSplit(final String string, final String delimiters) {
         StringTokenizer tokenizer = new StringTokenizer(string, delimiters);
         Vector<String> fields = new Vector<String>();
@@ -567,6 +568,7 @@ public final class StringHelper {
      * @return the coverage
      * @deprecated use {@link #join(Object[], String)}
      */
+    @Deprecated
     public static String arrayToString(final Object[] array, final String separator) {
     	return join(array, separator);
     }
@@ -577,7 +579,7 @@ public final class StringHelper {
      * @param separator The string separator to be used for convertion.
      * @return the coverage
      */
-    public static String iteratorToString(final Iterator iterator, final String separator) {
+    public static String iteratorToString(final Iterator<?> iterator, final String separator) {
         StringBuffer res = new StringBuffer("");
         while (iterator.hasNext()) {
             // Concat each element
@@ -643,10 +645,19 @@ public final class StringHelper {
     }
 
     /**
+     * Remove null characters represented by a block
+     * @param s The string to be parsed
+     * @return The string without any null characters 
+     */
+    public static String suppressNullCharacters(final String s) {
+        return s.replaceAll(new String(new char[] { '\u0000' }), "");
+    }
+
+    /**
      * @param c Class we want the name of.
      * @return the simple name of a class, i.e. its name without package.
      */
-    public static String getSimpleName(final Class c) {
+    public static String getSimpleName(final Class<?> c) {
         return c.getName().substring(c.getName().lastIndexOf('.') + 1);
     }
 
