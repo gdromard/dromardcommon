@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.dromard</groupId>
+	<artifactId>dromard.common.poi</artifactId>
+	<name>dromard.common.poi</name>
+	<version>0.1</version>
+	<url>http://code.google.com/p/dromardcommon
+	</url>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.0.1-FINAL</version>
+		</dependency>
+	  	<dependency>
+	  		<groupId>net.dromard</groupId>
+	  		<artifactId>dromard.common</artifactId>
+	  		<version>1.91</version>
+	  		<scope>runtime</scope>
+	  	</dependency>
+	</dependencies>
+</project>
