@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>net.dromard</groupId>
+	<artifactId>dromard.common.ant</artifactId>
+	<name>dromard.common.ant</name>
+	<version>0.1</version>
+	<url>http://code.google.com/p/dromardcommon</url>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.ant</groupId>
+			<artifactId>ant</artifactId>
+			<version>1.7.0</version>
+		</dependency>
+	  	<dependency>
+	  		<groupId>net.dromard</groupId>
+	  		<artifactId>dromard.common</artifactId>
+	  		<version>1.91</version>
+	  		<scope>runtime</scope>
+	  	</dependency>
+  	</dependencies>
+</project>
