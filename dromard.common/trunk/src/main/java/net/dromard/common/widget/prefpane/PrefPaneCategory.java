@@ -1,4 +1,4 @@
-package net.dromard.common.swing.widget;
+package net.dromard.common.widget.prefpane;
 
 /**
  * A pref pane category.

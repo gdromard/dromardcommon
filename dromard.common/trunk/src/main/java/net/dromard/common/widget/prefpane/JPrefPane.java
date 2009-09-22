@@ -1,4 +1,4 @@
-package net.dromard.common.swing.widget;
+package net.dromard.common.widget.prefpane;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -28,10 +28,10 @@ import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import net.dromard.common.swing.JForm;
 import net.dromard.common.swing.SwingComponent;
 import net.dromard.common.swing.SwingHelper;
 import net.dromard.common.swing.ui.GradientBackgroundPanelUI;
+import net.dromard.common.widget.jform.JForm;
 
 /**
  * A widget that handler several categorized JList.

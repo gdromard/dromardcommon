@@ -1,4 +1,4 @@
-package net.dromard.common.swing;
+package net.dromard.common.widget.htmlviewer;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;

@@ -26,6 +26,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import net.dromard.common.widget.jform.JForm;
+
 
 public class JCustomBar extends JPanel {
 	private static final long serialVersionUID = 664415987125837437L;

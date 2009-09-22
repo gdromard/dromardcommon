@@ -6,32 +6,33 @@ package net.dromard.common.util;
 
 import java.lang.ref.SoftReference;
 import java.util.Hashtable;
+import java.util.Set;
 
 /**
  * Hash table of soft references.
  * <br>
  * @author Gabriel Dromard
  */
-public class SoftHashtable<K, T> {
+@SuppressWarnings("unchecked")
+public class SoftHashtable extends Hashtable {
     /** Serial UID. */
     private static final long serialVersionUID = -5402199747809994434L;
-
-    private final Hashtable<K, SoftReference<T>> softHashtable = new Hashtable<K, SoftReference<T>>();
 
     /**
      * Retrieve the original object, if exists.
      * @param key The object key to retrieve.
      * @return The original object, if exists.
      */
-    public final T get(final K key) {
-        T result = null;
+    @Override
+    public final Object get(final Object key) {
+        Object result = null;
 
         if (key != null) {
-            SoftReference<T> softRef = softHashtable.get(key);
+            SoftReference softRef = (SoftReference) super.get(key);
             if (softRef != null) {
                 result = softRef.get();
                 if (result == null) {
-                    this.remove(key);
+                    remove(key);
                 }
             }
         }
@@ -44,8 +45,10 @@ public class SoftHashtable<K, T> {
      * @param value The object.
      * @return The softReference instance.
      */
-    public final void put(final K key, final T value) {
-        softHashtable.put(key, new SoftReference<T>(value));
+    @Override
+    public final Object put(final Object key, final Object value) {
+        super.put(key, new SoftReference<Object>(value));
+        return value;
     }
 
     /**
@@ -53,29 +56,24 @@ public class SoftHashtable<K, T> {
      * @param key The object key to remove from map.
      * @return The soft reference removed.
      */
-    public final T remove(final K key) {
-        T returnValue = null;
-        SoftReference<T> softRef = softHashtable.get(key);
+    @Override
+    public final Object remove(final Object key) {
+        Object returnValue = null;
+        SoftReference softRef = (SoftReference) super.get(key);
         if (softRef != null) {
             softRef.clear();
-            returnValue = softHashtable.remove(key).get();
+            returnValue = ((SoftReference) super.remove(key)).get();
         }
         return returnValue;
     }
 
     /**
-     * Clear this map.
+     * Return the entryset of objects.
+     * Note: not supported will throw an UnsupportedOperationException.
+     * @return nothing.
      */
-    public final void clear() {
-        softHashtable.clear();
-    }
-
-    /**
-     * Retrieve the number of SoftReference.
-     * <font color="red"><b>Note:</b> An object store into a reference can be cleared, <b>but counted</b> because the reference can still exists even if the object has been cleared</font>
-     * @return The number of SoftReference <font color="red"><b>Which can be different to the number of object</b></font>.
-     */
-    public final int size() {
-        return softHashtable.size();
+    @Override
+    public final Set entrySet() {
+        throw new UnsupportedOperationException();
     }
 }

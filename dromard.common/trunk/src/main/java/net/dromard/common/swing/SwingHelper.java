@@ -24,6 +24,8 @@ import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import net.dromard.common.widget.jform.JForm;
+
 public class SwingHelper {
 
     /**

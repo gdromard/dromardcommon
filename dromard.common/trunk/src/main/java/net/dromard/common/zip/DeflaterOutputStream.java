@@ -7,7 +7,6 @@
 package net.dromard.common.zip;
 
 import java.io.BufferedOutputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.Deflater;
@@ -21,23 +20,23 @@ import java.util.zip.Deflater;
  * @version 	1.36, 03/13/06
  * @author 	David Connelly
  */
-public
-class DeflaterOutputStream extends BufferedOutputStream {
+public class DeflaterOutputStream extends BufferedOutputStream {
     /**
      * Compressor for this stream.
      */
-    protected Deflater def;
+    private final Deflater def;
 
     /**
      * Output buffer for writing compressed data.
      */
-    protected byte[] buf;
-   
+    private final byte[] buf;
+
     /**
      * Indicates that the stream has been closed.
      */
-
     private boolean closed = false;
+    /** The usesDefaultDeflater. */
+    private boolean usesDefaultDeflater = false;
 
     /**
      * Creates a new output stream with the specified compressor and
@@ -47,7 +46,7 @@ class DeflaterOutputStream extends BufferedOutputStream {
      * @param size the output buffer size
      * @exception IllegalArgumentException if size is <= 0
      */
-    public DeflaterOutputStream(OutputStream out, Deflater def, int size) {
+    public DeflaterOutputStream(final OutputStream out, final Deflater def, final int size) {
         super(out);
         if (out == null || def == null) {
             throw new NullPointerException();
@@ -64,18 +63,16 @@ class DeflaterOutputStream extends BufferedOutputStream {
      * @param out the output stream
      * @param def the compressor ("deflater")
      */
-    public DeflaterOutputStream(OutputStream out, Deflater def) {
-	this(out, def, 512);
+    public DeflaterOutputStream(final OutputStream out, final Deflater def) {
+        this(out, def, 512);
     }
-
-    boolean usesDefaultDeflater = false;
 
     /**
      * Creates a new output stream with a default compressor and buffer size.
      * @param out the output stream
      */
-    public DeflaterOutputStream(OutputStream out) {
-	this(out, new Deflater());
+    public DeflaterOutputStream(final OutputStream out) {
+        this(out, new Deflater());
         usesDefaultDeflater = true;
     }
 
@@ -85,10 +82,11 @@ class DeflaterOutputStream extends BufferedOutputStream {
      * @param b the byte to be written
      * @exception IOException if an I/O error has occurred
      */
-    public void write(int b) throws IOException {
-        byte[] buf = new byte[1];
-	buf[0] = (byte)(b & 0xff);
-	write(buf, 0, 1);
+    @Override
+    public void write(final int b) throws IOException {
+        byte[] localBuf = new byte[1];
+        localBuf[0] = (byte) (b & 0xff);
+        write(localBuf, 0, 1);
     }
 
     /**
@@ -99,26 +97,27 @@ class DeflaterOutputStream extends BufferedOutputStream {
      * @param len the length of the data
      * @exception IOException if an I/O error has occurred
      */
-    public void write(byte[] b, int off, int len) throws IOException {
-	if (def.finished()) {
-	    throw new IOException("write beyond end of stream");
-	}
+    @Override
+    public void write(final byte[] b, final int off, final int len) throws IOException {
+        if (getDef().finished()) {
+            throw new IOException("write beyond end of stream");
+        }
         if ((off | len | (off + len) | (b.length - (off + len))) < 0) {
-	    throw new IndexOutOfBoundsException();
-	} else if (len == 0) {
-	    return;
-	}
-	if (!def.finished()) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        }
+        if (!getDef().finished()) {
             // Deflate no more than stride bytes at a time.  This avoids
             // excess copying in deflateBytes (see Deflater.c)
             int stride = buf.length;
-            for (int i = 0; i < len; i+= stride) {
-                def.setInput(b, off + i, Math.min(stride, len - i));
-                while (!def.needsInput()) {
+            for (int i = 0; i < len; i += stride) {
+                getDef().setInput(b, off + i, Math.min(stride, len - i));
+                while (!getDef().needsInput()) {
                     deflate();
                 }
             }
-	}
+        }
     }
 
     /**
@@ -128,12 +127,12 @@ class DeflaterOutputStream extends BufferedOutputStream {
      * @exception IOException if an I/O error has occurred
      */
     public void finish() throws IOException {
-	if (!def.finished()) {
-	    def.finish();
-	    while (!def.finished()) {
-		deflate();
-	    }
-	}
+        if (!getDef().finished()) {
+            getDef().finish();
+            while (!getDef().finished()) {
+                deflate();
+            }
+        }
     }
 
     /**
@@ -141,11 +140,13 @@ class DeflaterOutputStream extends BufferedOutputStream {
      * underlying stream.
      * @exception IOException if an I/O error has occurred
      */
+    @Override
     public void close() throws IOException {
         if (!closed) {
             finish();
-            if (usesDefaultDeflater)
-                def.end();
+            if (usesDefaultDeflater) {
+                getDef().end();
+            }
             out.close();
             closed = true;
         }
@@ -156,9 +157,30 @@ class DeflaterOutputStream extends BufferedOutputStream {
      * @throws IOException if an I/O error has occurred
      */
     protected void deflate() throws IOException {
-	int len = def.deflate(buf, 0, buf.length);
-	if (len > 0) {
-	    out.write(buf, 0, len);
-	}
+        int len = getDef().deflate(buf, 0, buf.length);
+        if (len > 0) {
+            out.write(buf, 0, len);
+        }
+    }
+
+    /**
+     * @return the def
+     */
+    public Deflater getDef() {
+        return def;
+    }
+
+    /**
+     * @param usesDefaultDeflater the usesDefaultDeflater to set
+     */
+    public void setUsesDefaultDeflater(final boolean usesDefaultDeflater) {
+        this.usesDefaultDeflater = usesDefaultDeflater;
+    }
+
+    /**
+     * @return the usesDefaultDeflater
+     */
+    public boolean isUsesDefaultDeflater() {
+        return usesDefaultDeflater;
     }
 }

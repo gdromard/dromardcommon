@@ -15,16 +15,23 @@ import java.util.Date;
  * @version	1.40, 11/17/05
  * @author	David Connelly
  */
-public
-class ZipEntry implements ZipConstants, Cloneable {
-    String name;	// entry name
-    long time = -1;	// modification time (in DOS time)
-    long crc = -1;	// crc-32 of entry data
-    long size = -1;	// uncompressed size of entry data
-    long csize = -1;   	// compressed size of entry data
-    int method = -1;	// compression method
-    byte[] extra;       // optional extra field data for entry
-    String comment;     // optional comment string for entry
+public class ZipEntry implements ZipConstants, Cloneable {
+    /** The entry name. */
+    private String name;
+    /** The modification time (in DOS time). */
+    private long time = -1;
+    /** crc-32 of entry data. */
+    private long crc = -1;
+    /** The uncompressed size of entry data. */
+    private long size = -1;
+    /** The compressed size of entry data. */
+    private long csize = -1;
+    /** compression method. */
+    private int method = -1;
+    /** The optional extra field data for entry. */
+    private byte[] extra;
+    /** The optional comment string for entry. */
+    private String comment;
 
     /**
      * Compression method for uncompressed entries.
@@ -36,13 +43,6 @@ class ZipEntry implements ZipConstants, Cloneable {
      */
     public static final int DEFLATED = 8;
 
-    //static {
-	/* Zip library is loaded from System.initializeSystemClass */
-	//initIDs();
-   // }
-
-   // private static native void initIDs();
-
     /**
      * Creates a new zip entry with the specified name.
      *
@@ -51,14 +51,14 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @exception IllegalArgumentException if the entry name is longer than
      *		  0xFFFF bytes
      */
-    public ZipEntry(String name) {
-	if (name == null) {
-	    throw new NullPointerException();
-	}
-	if (name.length() > 0xFFFF) {
-	    throw new IllegalArgumentException("entry name too long");
-	}
-	this.name = name;
+    public ZipEntry(final String name) {
+        if (name == null) {
+            throw new NullPointerException();
+        }
+        if (name.length() > 0xFFFF) {
+            throw new IllegalArgumentException("entry name too long");
+        }
+        this.name = name;
     }
 
     /**
@@ -66,34 +66,34 @@ class ZipEntry implements ZipConstants, Cloneable {
      * zip entry.
      * @param e a zip Entry object
      */
-    public ZipEntry(ZipEntry e) {
-	name = e.name;
-	time = e.time;
-	crc = e.crc;
-	size = e.size;
-	csize = e.csize;
-	method = e.method;
-	extra = e.extra;
-	comment = e.comment;
+    public ZipEntry(final ZipEntry e) {
+        name = e.name;
+        time = e.time;
+        crc = e.crc;
+        size = e.size;
+        csize = e.csize;
+        method = e.method;
+        extra = e.extra;
+        comment = e.comment;
     }
 
     /*
      * Creates a new zip entry for the given name with fields initialized
      * from the specified jzentry data.
      */
-    ZipEntry(String name, long jzentry) {
-	this.name = name;
-	initFields(jzentry);
+    ZipEntry(final String name, final long jzentry) {
+        this.name = name;
+        initFields(jzentry);
     }
 
-    private native void initFields(long jzentry);
+    private native void initFields(final long jzentry);
 
     /*
      * Creates a new zip entry with fields initialized from the specified
      * jzentry data.
      */
-    ZipEntry(long jzentry) {
-	initFields(jzentry);
+    ZipEntry(final long jzentry) {
+        initFields(jzentry);
     }
 
     /**
@@ -101,7 +101,7 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @return the name of the entry
      */
     public String getName() {
-	return name;
+        return name;
     }
 
     /**
@@ -110,8 +110,8 @@ class ZipEntry implements ZipConstants, Cloneable {
      *		   since the epoch
      * @see #getTime()
      */
-    public void setTime(long time) {
-	this.time = javaToDosTime(time);
+    public void setTime(final long time) {
+        this.time = ZipEntry.javaToDosTime(time);
     }
 
     /**
@@ -120,7 +120,7 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @see #setTime(long)
      */
     public long getTime() {
-	return time != -1 ? dosToJavaTime(time) : -1;
+        return time != -1 ? ZipEntry.dosToJavaTime(time) : -1;
     }
 
     /**
@@ -130,11 +130,11 @@ class ZipEntry implements ZipConstants, Cloneable {
      *		  than 0 or greater than 0xFFFFFFFF bytes
      * @see #getSize()
      */
-    public void setSize(long size) {
-	if (size < 0 || size > 0xFFFFFFFFL) {
-	    throw new IllegalArgumentException("invalid entry size");
-	}
-	this.size = size;
+    public void setSize(final long size) {
+        if (size < 0 || size > 0xFFFFFFFFL) {
+            throw new IllegalArgumentException("invalid entry size");
+        }
+        this.size = size;
     }
 
     /**
@@ -143,7 +143,7 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @see #setSize(long)
      */
     public long getSize() {
-	return size;
+        return size;
     }
 
     /**
@@ -154,16 +154,16 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @see #setCompressedSize(long)
      */
     public long getCompressedSize() {
-	return csize;
+        return csize;
     }
 
     /**
      * Sets the size of the compressed entry data.
-     * @param csize the compressed size to set to
+     * @param pCsize the compressed size to set to
      * @see #getCompressedSize()
      */
-    public void setCompressedSize(long csize) {
-	this.csize = csize;
+    public void setCompressedSize(final long pCsize) {
+        csize = pCsize;
     }
 
     /**
@@ -173,11 +173,11 @@ class ZipEntry implements ZipConstants, Cloneable {
      *		  less than 0 or greater than 0xFFFFFFFF
      * @see #getCrc()
      */
-    public void setCrc(long crc) {
-	if (crc < 0 || crc > 0xFFFFFFFFL) {
-	    throw new IllegalArgumentException("invalid entry crc-32");
-	}
-	this.crc = crc;
+    public void setCrc(final long crc) {
+        if (crc < 0 || crc > 0xFFFFFFFFL) {
+            throw new IllegalArgumentException("invalid entry crc-32");
+        }
+        this.crc = crc;
     }
 
     /**
@@ -188,7 +188,7 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @see #setCrc(long)
      */
     public long getCrc() {
-	return crc;
+        return crc;
     }
 
     /**
@@ -198,11 +198,11 @@ class ZipEntry implements ZipConstants, Cloneable {
      *		  method is invalid
      * @see #getMethod()
      */
-    public void setMethod(int method) {
-	if (method != STORED && method != DEFLATED) {
-	    throw new IllegalArgumentException("invalid compression method");
-	}
-	this.method = method;
+    public void setMethod(final int method) {
+        if (method != ZipEntry.STORED && method != ZipEntry.DEFLATED) {
+            throw new IllegalArgumentException("invalid compression method");
+        }
+        this.method = method;
     }
 
     /**
@@ -211,7 +211,7 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @see #setMethod(int)
      */
     public int getMethod() {
-	return method;
+        return method;
     }
 
     /**
@@ -221,11 +221,11 @@ class ZipEntry implements ZipConstants, Cloneable {
      *		  extra field data is greater than 0xFFFF bytes
      * @see #getExtra()
      */
-    public void setExtra(byte[] extra) {
-	if (extra != null && extra.length > 0xFFFF) {
-	    throw new IllegalArgumentException("invalid extra field length");
-	}
-	this.extra = extra;
+    public void setExtra(final byte[] extra) {
+        if (extra != null && extra.length > 0xFFFF) {
+            throw new IllegalArgumentException("invalid extra field length");
+        }
+        this.extra = extra;
     }
 
     /**
@@ -234,7 +234,7 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @see #setExtra(byte[])
      */
     public byte[] getExtra() {
-	return extra;
+        return extra;
     }
 
     /**
@@ -244,12 +244,11 @@ class ZipEntry implements ZipConstants, Cloneable {
      *		  comment string is greater than 0xFFFF bytes
      * @see #getComment()
      */
-    public void setComment(String comment) {
-	if (comment != null && comment.length() > 0xffff/3
-                    && ZipOutputStream.getUTF8Length(comment) > 0xffff) {
-	    throw new IllegalArgumentException("invalid entry comment length");
-	}
-	this.comment = comment;
+    public void setComment(final String comment) {
+        if (comment != null && comment.length() > 0xffff / 3 && ZipOutputStream.getUTF8Length(comment) > 0xffff) {
+            throw new IllegalArgumentException("invalid entry comment length");
+        }
+        this.comment = comment;
     }
 
     /**
@@ -258,7 +257,7 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @see #setComment(String)
      */
     public String getComment() {
-	return comment;
+        return comment;
     }
 
     /**
@@ -267,61 +266,71 @@ class ZipEntry implements ZipConstants, Cloneable {
      * @return true if this is a directory entry
      */
     public boolean isDirectory() {
-	return name.endsWith("/");
+        return name.endsWith("/");
     }
 
     /**
      * Returns a string representation of the ZIP entry.
      */
+    @Override
     public String toString() {
-	return getName();
+        return getName();
     }
 
     /*
      * Converts DOS time to Java time (number of milliseconds since epoch).
      */
-    private static long dosToJavaTime(long dtime) {
-	Date d = new Date((int)(((dtime >> 25) & 0x7f) + 80),
-			  (int)(((dtime >> 21) & 0x0f) - 1),
-			  (int)((dtime >> 16) & 0x1f),
-			  (int)((dtime >> 11) & 0x1f),
-			  (int)((dtime >> 5) & 0x3f),
-			  (int)((dtime << 1) & 0x3e));
-	return d.getTime();
+    private static long dosToJavaTime(final long dtime) {
+        Date d = new Date((int) (((dtime >> 25) & 0x7f) + 80), (int) (((dtime >> 21) & 0x0f) - 1), (int) ((dtime >> 16) & 0x1f), (int) ((dtime >> 11) & 0x1f), (int) ((dtime >> 5) & 0x3f), (int) ((dtime << 1) & 0x3e));
+        return d.getTime();
     }
 
     /*
      * Converts Java time to DOS time.
      */
-    private static long javaToDosTime(long time) {
-	Date d = new Date(time);
-	int year = d.getYear() + 1900;
-	if (year < 1980) {
-	    return (1 << 21) | (1 << 16);
-	}
-	return (year - 1980) << 25 | (d.getMonth() + 1) << 21 |
-               d.getDate() << 16 | d.getHours() << 11 | d.getMinutes() << 5 |
-               d.getSeconds() >> 1;
+    private static long javaToDosTime(final long time) {
+        Date d = new Date(time);
+        int year = d.getYear() + 1900;
+        if (year < 1980) {
+            return (1 << 21) | (1 << 16);
+        }
+        return (year - 1980) << 25 | (d.getMonth() + 1) << 21 | d.getDate() << 16 | d.getHours() << 11 | d.getMinutes() << 5 | d.getSeconds() >> 1;
     }
 
     /**
      * Returns the hash code value for this entry.
      */
+    @Override
     public int hashCode() {
-	return name.hashCode();
+        return name.hashCode();
     }
 
     /**
      * Returns a copy of this entry.
      */
+    @Override
     public Object clone() {
-	try {
-	    ZipEntry e = (ZipEntry)super.clone();
-	    e.extra = (extra == null ? null : (byte[])extra.clone());
-	    return e;
-	} catch (CloneNotSupportedException e) {
-	    // This should never happen, since we are Cloneable
-	    throw new InternalError();
-	}
+        try {
+            ZipEntry e = (ZipEntry) super.clone();
+            e.extra = (extra == null ? null : (byte[]) extra.clone());
+            return e;
+        } catch (CloneNotSupportedException e) {
+            // This should never happen, since we are Cloneable
+            throw new InternalError();
+        }
+    }
+
+    /**
+     * @param csize the csize to set
+     */
+    public void setCsize(final long csize) {
+        this.csize = csize;
+    }
+
+    /**
+     * @return the csize
+     */
+    public long getCsize() {
+        return csize;
     }
 }
