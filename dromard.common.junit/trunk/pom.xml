@@ -2,9 +2,9 @@
 <project>
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>net.dromard</groupId>
-	<artifactId>dromard.common</artifactId>
-	<name>dromard.common</name>
-	<version>1.91</version>
+	<artifactId>dromard.common.junit</artifactId>
+	<name>dromard.common.junit</name>
+	<version>0.1</version>
 	<url>http://code.google.com/p/dromardcommon
 	</url>
 	<build>
@@ -50,30 +50,4 @@
 			<version>3.0.1-FINAL</version>
 		</dependency>
 	</dependencies>
-	<reporting>
-		<plugins>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<source>1.5</source>
-					<doclet>gr.spinellis.umlgraph.doclet.UmlGraphDoc</doclet>
-					<docletArtifact>
-						<groupId>gr.spinellis</groupId>
-						<artifactId>UmlGraph</artifactId>
-						<version>4.4</version>
-					</docletArtifact>
-					<additionalparam>
-						-inferrel -inferdep -quiet -hide java.*
-						-collpackages java.util.* -qualify
-						-postfixpackage -nodefontsize 9
-						-nodefontpackagesize 7 -attributes -operations
-						-enumerations -enumconstants -visibility
-						-link "http://java.sun.com/j2se/1.5/docs/api/"
-						-link "http://static.springframework.org/spring/docs/2.0.x/api/"
-						-link "http://www.hibernate.org/hib_docs/v3/api/"
-				</additionalparam>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
 </project>
