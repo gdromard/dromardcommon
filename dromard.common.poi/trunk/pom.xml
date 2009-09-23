@@ -27,7 +27,7 @@
 	  	<dependency>
 	  		<groupId>net.dromard</groupId>
 	  		<artifactId>dromard.common</artifactId>
-	  		<version>1.91</version>
+	  		<version>2.0</version>
 	  		<scope>runtime</scope>
 	  	</dependency>
 	</dependencies>
