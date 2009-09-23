@@ -4,7 +4,7 @@
 	<groupId>net.dromard</groupId>
 	<artifactId>dromard.common.ldap</artifactId>
 	<name>dromard.common.ldap</name>
-	<version>1.91</version>
+	<version>0.1</version>
 	<url>http://code.google.com/p/dromardcommon
 	</url>
 	<build>
@@ -27,7 +27,7 @@
 	  	<dependency>
 	  		<groupId>net.dromard</groupId>
 	  		<artifactId>dromard.common</artifactId>
-	  		<version>1.91</version>
+	  		<version>2.0</version>
 	  		<scope>runtime</scope>
 	  	</dependency>
 	</dependencies>
