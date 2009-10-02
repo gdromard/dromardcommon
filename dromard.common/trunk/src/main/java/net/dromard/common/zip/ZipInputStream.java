@@ -1,25 +1,22 @@
-/*
- * @(#)DeflaterOutputStream.java	1.36 06/03/13
- *
- * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
-
 package net.dromard.common.zip;
+
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
+import java.lang.reflect.Field;
 import java.util.zip.CRC32;
 import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 
 /**
  * This class implements an input stream filter for reading files in the ZIP file format.
  * Includes support for both compressed and uncompressed entries.
- * @author David Connelly
- * @version 1.43, 07/31/06
+ * @author Gabriel Dromard
+ * 30 sept. 2009
  */
 public class ZipInputStream extends InflaterInputStream implements ZipConstants {
     /** The entry. */
@@ -32,7 +29,8 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
     private long remaining;
     /** The tmpbuf. */
     private final byte[] tmpbuf = new byte[2048];
-    /** The b. */
+
+    /** The buffer. */
     private byte[] b = new byte[512];
 
     /** The STORED. */
@@ -42,9 +40,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
 
     /** The closed. */
     private boolean closed = false;
-    // this flag is set to true after EOF has reached for
-    // one entry
-    /** The entryEOF. */
+    /** this flag is set to true after EOF has reached for one entry. */
     private boolean entryEOF = false;
 
     /**
@@ -62,7 +58,22 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      */
     public ZipInputStream(final InputStream in) {
         super(new PushbackInputStream(in, 512), new Inflater(true), 512);
-        setUsesDefaultInflater(true);
+        //usesDefaultInflater = true;
+        Field usesDefaultInflaterField;
+        try {
+            usesDefaultInflaterField = InflaterInputStream.class.getDeclaredField("usesDefaultInflater");
+            usesDefaultInflaterField.setAccessible(true);
+            usesDefaultInflaterField.setBoolean(this, true);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
         if (in == null) {
             throw new NullPointerException("in is null");
         }
@@ -80,7 +91,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
             closeEntry();
         }
         crc.reset();
-        getInf().reset();
+        inf.reset();
         entry = readLOC();
         if (entry == null) {
             return null;
@@ -98,9 +109,7 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      */
     public void closeEntry() throws IOException {
         ensureOpen();
-
         while (read(tmpbuf, 0, tmpbuf.length) != -1) {
-            entryEOF = false;
         }
         entryEOF = true;
     }
@@ -127,12 +136,12 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      * @exception IOException if an I/O error has occurred
      */
     @Override
-    public int read(final byte[] buffer, final int off, final int len) throws IOException {
+    public int read(final byte[] bytes, final int off, final int length) throws IOException {
+        int len = length;
         ensureOpen();
-        int localLen = len;
-        if (off < 0 || localLen < 0 || off > buffer.length - localLen) {
+        if (off < 0 || len < 0 || off > bytes.length - len) {
             throw new IndexOutOfBoundsException();
-        } else if (localLen == 0) {
+        } else if (len == 0) {
             return 0;
         }
 
@@ -141,31 +150,34 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
         }
         switch (entry.getMethod()) {
         case DEFLATED:
-            localLen = super.read(buffer, off, localLen);
-            if (localLen == -1) {
+            len = super.read(bytes, off, len);
+            if (len == -1) {
                 readEnd(entry);
                 entryEOF = true;
                 entry = null;
             } else {
-                crc.update(buffer, off, localLen);
+                crc.update(bytes, off, len);
             }
-            return localLen;
+            return len;
         case STORED:
             if (remaining <= 0) {
                 entryEOF = true;
                 entry = null;
                 return -1;
             }
-            if (localLen > remaining) {
-                localLen = (int) remaining;
+            if (len > remaining) {
+                len = (int) remaining;
             }
-            localLen = in.read(buffer, off, localLen);
-            if (localLen == -1) {
+            len = in.read(bytes, off, len);
+            if (len == -1) {
                 throw new ZipException("unexpected EOF");
             }
-            crc.update(buffer, off, localLen);
-            remaining -= localLen;
-            return localLen;
+            crc.update(bytes, off, len);
+            remaining -= len;
+            if (remaining == 0 && entry.getCrc() != crc.getValue()) {
+                throw new ZipException("invalid entry CRC (expected 0x" + Long.toHexString(entry.getCrc()) + " but got 0x" + Long.toHexString(crc.getValue()) + ")");
+            }
+            return len;
         default:
             throw new ZipException("invalid compression method");
         }
@@ -208,9 +220,12 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      */
     @Override
     public void close() throws IOException {
-        if (!closed) {
-            super.close();
-            closed = true;
+        closeEntry();
+        if (entryEOF) {
+            if (!closed) {
+                super.close();
+                closed = true;
+            }
         }
     }
 
@@ -252,16 +267,17 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
         if ((flag & 1) == 1) {
             throw new ZipException("encrypted ZIP entry not supported");
         }
-        e.setMethod(ZipInputStream.get16(tmpbuf, ZipConstants.LOCHOW));
+        int method = ZipInputStream.get16(tmpbuf, ZipConstants.LOCHOW);
+        e.setMethod(method);
         e.setTime(ZipInputStream.get32(tmpbuf, ZipConstants.LOCTIM));
         if ((flag & 8) == 8) {
             /* "Data Descriptor" present */
-            if (e.getMethod() != ZipInputStream.DEFLATED) {
+            if (method != ZipInputStream.DEFLATED) {
                 throw new ZipException("only DEFLATED entries can have EXT descriptor");
             }
         } else {
             e.setCrc(ZipInputStream.get32(tmpbuf, ZipConstants.LOCCRC));
-            e.setCsize(ZipInputStream.get32(tmpbuf, ZipConstants.LOCSIZ));
+            e.setCompressedSize(ZipInputStream.get32(tmpbuf, ZipConstants.LOCSIZ));
             e.setSize(ZipInputStream.get32(tmpbuf, ZipConstants.LOCLEN));
         }
         len = ZipInputStream.get16(tmpbuf, ZipConstants.LOCEXT);
@@ -286,9 +302,9 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
      * Reads end of deflated entry as well as EXT descriptor if present.
      */
     private void readEnd(final ZipEntry e) throws IOException {
-        int n = getInf().getRemaining();
+        int n = inf.getRemaining();
         if (n > 0) {
-            ((PushbackInputStream) in).unread(getBuf(), getLen() - n, n);
+            ((PushbackInputStream) in).unread(buf, len - n, n);
         }
         if ((flag & 8) == 8) {
             /* "Data Descriptor" present */
@@ -296,20 +312,20 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
             long sig = ZipInputStream.get32(tmpbuf, 0);
             if (sig != ZipConstants.EXTSIG) { // no EXTSIG present
                 e.setCrc(sig);
-                e.setCsize(ZipInputStream.get32(tmpbuf, ZipConstants.EXTSIZ - ZipConstants.EXTCRC));
+                e.setCompressedSize(ZipInputStream.get32(tmpbuf, ZipConstants.EXTSIZ - ZipConstants.EXTCRC));
                 e.setSize(ZipInputStream.get32(tmpbuf, ZipConstants.EXTLEN - ZipConstants.EXTCRC));
                 ((PushbackInputStream) in).unread(tmpbuf, ZipConstants.EXTHDR - ZipConstants.EXTCRC - 1, ZipConstants.EXTCRC);
             } else {
                 e.setCrc(ZipInputStream.get32(tmpbuf, ZipConstants.EXTCRC));
-                e.setCsize(ZipInputStream.get32(tmpbuf, ZipConstants.EXTSIZ));
+                e.setCompressedSize(ZipInputStream.get32(tmpbuf, ZipConstants.EXTSIZ));
                 e.setSize(ZipInputStream.get32(tmpbuf, ZipConstants.EXTLEN));
             }
         }
-        if (e.getSize() != getInf().getBytesWritten()) {
-            throw new ZipException("invalid entry size (expected " + e.getSize() + " but got " + getInf().getBytesWritten() + " bytes)");
+        if (e.getSize() != inf.getBytesWritten()) {
+            throw new ZipException("invalid entry size (expected " + e.getSize() + " but got " + inf.getBytesWritten() + " bytes)");
         }
-        if (e.getCsize() != getInf().getBytesRead()) {
-            throw new ZipException("invalid entry compressed size (expected " + e.getCsize() + " but got " + getInf().getBytesRead() + " bytes)");
+        if (e.getCompressedSize() != inf.getBytesRead()) {
+            throw new ZipException("invalid entry compressed size (expected " + e.getCompressedSize() + " but got " + inf.getBytesRead() + " bytes)");
         }
         if (e.getCrc() != crc.getValue()) {
             throw new ZipException("invalid entry CRC (expected 0x" + Long.toHexString(e.getCrc()) + " but got 0x" + Long.toHexString(crc.getValue()) + ")");
@@ -334,14 +350,14 @@ public class ZipInputStream extends InflaterInputStream implements ZipConstants 
 
     /*
     private void readFully(byte[] b, int off, int len) throws IOException {
-    	while (len > 0) {
-    		int n = in.read(b, off, len);
-    		if (n == -1) {
-    			throw new EOFException();
-    		}
-    		off += n;
-    		len -= n;
-    	}
+        while (len > 0) {
+            int n = in.read(b, off, len);
+            if (n == -1) {
+                throw new EOFException();
+            }
+            off += n;
+            len -= n;
+        }
     }
      */
 
