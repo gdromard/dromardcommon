@@ -16,7 +16,7 @@ import javax.swing.JWindow;
  * @author Gabriel Dromard
  * 2 oct. 2009
  */
-public class WindowResizer extends MouseAdapter {
+public class WindowResizer {
     private final JWindow window;
     private Point absolute = null;
     private Dimension size = null;
