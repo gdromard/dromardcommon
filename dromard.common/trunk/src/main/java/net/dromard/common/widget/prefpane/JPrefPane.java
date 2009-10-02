@@ -21,15 +21,12 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
 import javax.swing.ListCellRenderer;
 import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import net.dromard.common.swing.SwingComponent;
-import net.dromard.common.swing.SwingHelper;
 import net.dromard.common.swing.ui.GradientBackgroundPanelUI;
 import net.dromard.common.widget.jform.JForm;
 
@@ -318,29 +315,5 @@ public class JPrefPane implements SwingComponent<JComponent> {
                         new int[]{bounds.y + 5, bounds.y + 5 + arrowWidth / 2, bounds.y + 5 + arrowWidth}, 3);
             }
         }
-    }
-
-    public static void main(final String[] args) {
-        JSplitPane sp = new JSplitPane();
-        sp.setBackground(Color.GRAY.darker());
-        sp.setDividerSize(1);
-        sp.setDividerLocation(200);
-        JPrefPane jPrefPane = new JPrefPane();
-        PrefPaneCategory category1 = new PrefPaneCategory("cat1");
-        jPrefPane.addCategory(category1);
-        jPrefPane.addItem(category1, new PrefPaneItem("item1"));
-        jPrefPane.addItem(category1, new PrefPaneItem("item2"));
-        jPrefPane.addItem(category1, new PrefPaneItem("item3"));
-        PrefPaneCategory category2 = new PrefPaneCategory("cat2");
-        jPrefPane.addCategory(category2);
-        jPrefPane.addItem(category2, new PrefPaneItem("item1"));
-        jPrefPane.addItem(category2, new PrefPaneItem("item2"));
-        jPrefPane.addItem(category2, new PrefPaneItem("item3"));
-
-        sp.setLeftComponent(jPrefPane.getComponent());
-        jPrefPane.getComponent().setBackground(JPrefPane.ACTIVE_BACKGROUND_COLOR);
-        sp.setRightComponent(new JTextArea());
-
-        SwingHelper.openInFrame(sp, "PrefPane demo");
     }
 }
