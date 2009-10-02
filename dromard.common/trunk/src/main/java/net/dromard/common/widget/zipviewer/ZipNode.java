@@ -3,6 +3,7 @@ package net.dromard.common.widget.zipviewer;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
+ * A zipnode class.
  * @author Gabriel Dromard
  * 30 juil. 2009
  */

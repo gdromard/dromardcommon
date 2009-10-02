@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.zip.ZipFile;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -15,10 +16,11 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 /**
- * TODO Comment here.
+ * A swing component that show a zip content.
  * @author Gabriel Dromard
  * 30 juil. 2009
  */
@@ -30,6 +32,10 @@ public class JZipViewer extends JTree {
         setModel(model);
         addKeyListener(treeHandler);
         addMouseListener(treeHandler);
+        setRootVisible(false);
+        DefaultTreeCellRenderer cellRenderer = new DefaultTreeCellRenderer();
+        cellRenderer.setLeafIcon(new ImageIcon(JZipViewer.class.getResource("document.gif")));
+        setCellRenderer(cellRenderer);
     }
 
     /** The tree. */
