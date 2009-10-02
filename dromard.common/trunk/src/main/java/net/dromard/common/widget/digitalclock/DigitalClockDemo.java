@@ -10,7 +10,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JWindow;
 import javax.swing.border.BevelBorder;
 
-import net.dromard.common.swing.mouseadapter.MoveAndResizeMouseListener;
+import net.dromard.common.swing.mouseadapter.WindowDragger;
+import net.dromard.common.swing.mouseadapter.WindowResizer;
 
 /**
  * The DigitalClock demo.
@@ -31,7 +32,9 @@ public class DigitalClockDemo {
         clockFrame.setSize(150, 60);
         clockFrame.setLocationRelativeTo(null);
         clockFrame.setVisible(true);
-        MouseAdapter mouseAdapter = new MoveAndResizeMouseListener(clockFrame) {
+        new WindowResizer(clockFrame);
+        new WindowDragger(clockFrame, clockFrame);
+        MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mouseClicked(final MouseEvent e) {
                 if (!e.isConsumed() && e.getClickCount() >= 2) {
