@@ -52,6 +52,10 @@ class InfiniteProgressComponent extends JComponent {
         setVisible(false);
     }
 
+    public boolean isRunning() {
+        return running;
+    }
+
     @Override
     public void paintComponent(final Graphics g) {
         if (running) {

@@ -19,6 +19,10 @@ public class InfiniteProgress implements SwingComponent<JComponent> {
         component.stop();
     }
 
+    public boolean isRunning() {
+        return component.isRunning();
+    }
+
     @Override
     public JComponent getComponent() {
         return component;
