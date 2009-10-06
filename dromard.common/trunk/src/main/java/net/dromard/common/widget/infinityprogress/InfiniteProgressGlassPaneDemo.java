@@ -26,19 +26,20 @@ public class InfiniteProgressGlassPaneDemo {
             public void actionPerformed(final ActionEvent arg0) {
                 System.out.println("[DEBUG] starting progression");
                 glassPane.start();
+                glassPane.setInfo("Progress demo info");
                 new Thread() {
                     @Override
                     public void run() {
                         try {
-                            glassPane.setText("Progress Demo 1/5");
+                            glassPane.setText("Progress text 1/5");
                             Thread.sleep(1000);
-                            glassPane.setText("Progress Demo 2/5");
+                            glassPane.setText("Progress text 2/5");
                             Thread.sleep(1000);
-                            glassPane.setText("Progress Demo 3/5");
+                            glassPane.setText("Progress text 3/5");
                             Thread.sleep(1000);
-                            glassPane.setText("Progress Demo 4/5");
+                            glassPane.setText("Progress text 4/5");
                             Thread.sleep(1000);
-                            glassPane.setText("Progress Demo 5/5");
+                            glassPane.setText("Progress text 5/5");
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
