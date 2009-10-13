@@ -25,7 +25,7 @@ public class Ini {
     private Map<String, Map<String, String>> valueByKeyBySection;
 
     /** The encoding. */
-    private String encoding = null;
+    private String encoding = "8859_1";
 
     public Ini() throws IOException {
     }
