@@ -2,6 +2,7 @@ package net.dromard.common.io;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.dromard.common.nio.FileChannelHandler;
 import net.dromard.common.treenode.DefaultTreeNodeVisitor;
 import net.dromard.common.treenode.FileTreeNode;
 import net.dromard.common.visitable.Visitor;
@@ -20,13 +22,18 @@ import net.dromard.common.visitable.Visitor;
  */
 public class Grep {
     private final GrepVisitor visitor;
+    private final String encoding;
     private int nbMatches = 0;
     private final Map<File, List<String>> matches = new HashMap<File, List<String>>();
 
     public Grep(final File source, final String grepRegexp, final String fileRegexp) throws Exception {
+        this(source, grepRegexp, fileRegexp, "8859_1");
+    }
+
+    public Grep(final File source, final String grepRegexp, final String fileRegexp, final String encoding) throws Exception {
         visitor = new GrepVisitor(grepRegexp, fileRegexp);
         new FileTreeNode(source).accept(visitor);
-        //System.out.println("Found " + getNbMatches() + " for '" + grepRegexp + "'");
+        this.encoding = encoding;
     }
 
     /**
@@ -59,7 +66,10 @@ public class Grep {
             }
 
             BufferedReader buf = null;
+            FileChannelHandler channel;
             try {
+                channel = new FileChannelHandler(new FileInputStream(source).getChannel());
+                channel.readString((int) channel.getSize(), encoding);
                 buf = new BufferedReader(new FileReader(source));
                 String line = buf.readLine();
                 while (line != null) {
@@ -76,8 +86,9 @@ public class Grep {
                     line = buf.readLine();
                 }
             } finally {
-                if (buf != null)
+                if (buf != null) {
                     buf.close();
+                }
             }
         }
         return count;

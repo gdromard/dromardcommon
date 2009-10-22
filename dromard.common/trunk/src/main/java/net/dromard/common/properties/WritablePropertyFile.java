@@ -1,9 +1,11 @@
 package net.dromard.common.properties;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -15,7 +17,12 @@ import java.util.Vector;
  * @author  Gabriel Dromard
  */
 public class WritablePropertyFile extends PropertyFile {
+    /** The serialVersionUID. */
+    private static final long serialVersionUID = -7532580736632170542L;
+    /** The autoCommit. */
     protected boolean autoCommit = false;
+    /** The encoding. */
+    protected String encoding = "8859_1";
 
     /**
      * If the resource is in the current directory ... it will take it !
@@ -33,6 +40,16 @@ public class WritablePropertyFile extends PropertyFile {
      */
     public WritablePropertyFile(final File file) throws FileNotFoundException, IOException {
         super(file);
+    }
+
+    /**
+     * If the resource is in the current directory ... take it !
+     * If the resource is not in the current directory check in the requester package.
+     * @throws SourcingException Thrown if the file can not be found or if an error occurred while loading it or closing it.
+     */
+    public WritablePropertyFile(final File file, final String encoding) throws FileNotFoundException, IOException {
+        super(file);
+        this.encoding = encoding;
     }
 
     /**
@@ -62,8 +79,9 @@ public class WritablePropertyFile extends PropertyFile {
     public Object setProperty(final String key, final String value) {
         Object o = super.setProperty(key, value);
         try {
-            if (isAutoCommitEnabled())
+            if (isAutoCommitEnabled()) {
                 save();
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -86,12 +104,13 @@ public class WritablePropertyFile extends PropertyFile {
         File file = getFile();
         FileOutputStream oStream = null;
         // file does not exist create it !
-        if (!file.exists())
+        if (!file.exists()) {
             file.createNewFile();
+        }
         // Initialisation du flux de sortie
         oStream = new FileOutputStream(file);
         // Enregistrement des données
-        store(oStream, file.getName());
+        store(new BufferedWriter(new OutputStreamWriter(oStream, encoding)), file.getName());
         // Fermeture du flux de sortie
         oStream.close();
         // Update last modified attribute
