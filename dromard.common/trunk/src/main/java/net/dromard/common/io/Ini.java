@@ -93,15 +93,17 @@ public class Ini {
      */
     private String readNextLine(final CharBuffer cbuf, final String currentSection, final String[] keyValuePair) {
         String line = "";
+        boolean eol = false;
         String localSection = currentSection;
         while (cbuf.hasRemaining() || line.length() != 0) {
             if (cbuf.hasRemaining()) {
-                line += cbuf.get();
-            }
-            if (!cbuf.hasRemaining() || line.endsWith(Ini.EOL)) {
-                if (cbuf.hasRemaining()) {
-                    line = line.substring(0, line.length() - Ini.EOL.length());
+                char c = cbuf.get();
+                eol = Ini.EOL.indexOf(c) > -1;
+                if (!eol) {
+                    line += c;
                 }
+            }
+            if (!cbuf.hasRemaining() || eol) {
                 if (line.indexOf(';') > -1 && (line.indexOf(';') == 0 || line.charAt(line.indexOf(';') - 1) != '\\')) {
                     line = line.substring(0, line.indexOf(';'));
                 }
@@ -144,6 +146,18 @@ public class Ini {
             return null;
         }
         return map.get(key);
+    }
+
+    /**
+     * Retrieve the value of the given key that belong in the given section.
+     * @param section      The key section
+     * @param key          The key
+     * @param defaultValue If the value does not exists, return this default value
+     * @return The value corresponding or null if the key does not exist.
+     */
+    public String getValue(final String section, final String key, final String defaultValue) {
+        String value = getValue(section, key);
+        return value == null ? defaultValue : value;
     }
 
     /**
