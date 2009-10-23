@@ -68,24 +68,6 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
         hints.put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
     }
 
-    public double getPrimitiveWidth() {
-        if (primitiveWidth <= 0) {
-            primitiveWidth = Math.min((double) getWidth() / 16, getHeight()) / 16;
-            if (primitiveWidth <= 0) {
-                primitiveWidth = 30 / 16;
-            }
-        }
-        return primitiveWidth;
-    }
-
-    private double getPrimitiveLength() {
-        return primitiveWidth * 2.7;
-    }
-
-    public void setPrimitiveWidth(final double width) {
-        primitiveWidth = width / 16;
-    }
-
     public void setText(final String text) {
         repaint();
         this.text = text;
@@ -142,8 +124,9 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
                 g2.fill(ticker[i]);
 
                 Rectangle2D bounds = ticker[i].getBounds2D();
-                if (bounds.getMaxY() > maxY)
+                if (bounds.getMaxY() > maxY) {
                     maxY = bounds.getMaxY();
+                }
             }
 
             if (text != null && text.length() > 0) {
@@ -155,6 +138,24 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
                 layout.draw(g2, (float) (width - bounds.getWidth()) / 2, (float) (maxY + layout.getLeading() + 2 * layout.getAscent()));
             }
         }
+    }
+
+    public double getPrimitiveWidth() {
+        if (primitiveWidth <= 0) {
+            primitiveWidth = Math.min((double) getWidth() / 16, getHeight()) / 16;
+            if (primitiveWidth <= 0) {
+                primitiveWidth = 30 / 16;
+            }
+        }
+        return primitiveWidth;
+    }
+
+    private double getPrimitiveLength() {
+        return primitiveWidth * 2.7;
+    }
+
+    public void setPrimitiveWidth(final double width) {
+        primitiveWidth = width / 16;
     }
 
     private Area[] buildTicker() {
@@ -210,16 +211,18 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
             AffineTransform toCircle = AffineTransform.getRotateInstance(fixedIncrement, center.getX(), center.getY());
 
             long start = System.currentTimeMillis();
-            if (rampDelay == 0)
+            if (rampDelay == 0) {
                 alphaLevel = rampUp ? 255 : 0;
+            }
 
             started = true;
             boolean inRamp = rampUp;
 
             while (!Thread.interrupted()) {
                 if (!inRamp) {
-                    for (Area element : ticker)
+                    for (Area element : ticker) {
                         element.transform(toCircle);
+                    }
                 }
 
                 repaint();
@@ -251,7 +254,6 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
             if (!rampUp) {
                 started = false;
                 repaint();
-
                 setVisible(false);
                 removeMouseListener(InfiniteProgressPanel.this);
             }
@@ -281,6 +283,7 @@ public class InfiniteProgressPanel extends JComponent implements MouseListener {
         demo.getContentPane().add(btn);
         final InfiniteProgressPanel progress = new InfiniteProgressPanel("test");
         progress.setPrimitiveWidth(100);
+
         demo.setGlassPane(progress);
         btn.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent arg0) {
