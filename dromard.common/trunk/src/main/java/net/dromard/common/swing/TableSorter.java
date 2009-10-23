@@ -293,7 +293,7 @@ public class TableSorter extends AbstractTableModel {
         return viewToModel;
     }
 
-    public int modelIndex(final int viewIndex) {
+    public int getModelIndex(final int viewIndex) {
         return getViewToModel()[viewIndex].modelIndex;
     }
 
@@ -302,10 +302,20 @@ public class TableSorter extends AbstractTableModel {
             int n = getViewToModel().length;
             modelToView = new int[n];
             for (int i = 0; i < n; i++) {
-                modelToView[modelIndex(i)] = i;
+                modelToView[getModelIndex(i)] = i;
             }
         }
         return modelToView;
+    }
+
+    public int search(final int from, final String search, final int column) {
+        Row[] view = getViewToModel();
+        for (int i = from; i < view.length; ++i) {
+            if (((String) getValueAt(view[i].modelIndex, column)).toLowerCase().indexOf(search.toLowerCase()) > -1) {
+                return view[i].modelIndex;
+            }
+        }
+        return -1;
     }
 
     // TableModel interface methods 
@@ -331,19 +341,19 @@ public class TableSorter extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(final int row, final int column) {
-        return tableModel.isCellEditable(modelIndex(row), column);
+        return tableModel.isCellEditable(getModelIndex(row), column);
     }
 
     public Object getValueAt(final int row, final int column) {
         if (tableModel.getRowCount() > row) {
-            return tableModel.getValueAt(modelIndex(row), column);
+            return tableModel.getValueAt(getModelIndex(row), column);
         }
         return null;
     }
 
     @Override
     public void setValueAt(final Object aValue, final int row, final int column) {
-        tableModel.setValueAt(aValue, modelIndex(row), column);
+        tableModel.setValueAt(aValue, getModelIndex(row), column);
     }
 
     // Helper classes
