@@ -41,8 +41,9 @@ class InfiniteProgressComponent extends JComponent {
     }
 
     public void start() {
-        setVisible(true);
+        running = true;
         buildTicker();
+        setVisible(true);
         animation = new Thread(new Animator());
         animation.start();
     }
@@ -147,7 +148,6 @@ class InfiniteProgressComponent extends JComponent {
             long start = System.currentTimeMillis();
             alphaLevel = 0;
 
-            running = true;
             boolean inRamp = true;
 
             while (running) {

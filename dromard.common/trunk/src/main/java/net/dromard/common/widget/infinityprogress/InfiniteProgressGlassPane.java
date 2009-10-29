@@ -5,7 +5,9 @@ import java.awt.GridBagLayout;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
+import net.dromard.common.swing.SwingPropertiesHelper;
 import net.dromard.common.widget.glasspane.GlassPane;
 
 public class InfiniteProgressGlassPane {
@@ -15,6 +17,8 @@ public class InfiniteProgressGlassPane {
     protected final JLabel infoLabel = new JLabel();
 
     public InfiniteProgressGlassPane(final JFrame frame) {
+        progressLabel.setFont(SwingPropertiesHelper.asFont("Century Gothic-BOLD-15"));
+        infoLabel.setFont(SwingPropertiesHelper.asFont("Century Gothic-BOLD-12"));
         glassPane.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         progress.setWidth(100);
@@ -25,7 +29,7 @@ public class InfiniteProgressGlassPane {
         c.anchor = GridBagConstraints.SOUTH;
         glassPane.add(progress.getComponent(), c);
 
-        progressLabel.setHorizontalAlignment(JLabel.CENTER);
+        progressLabel.setHorizontalAlignment(SwingConstants.CENTER);
         c.fill = GridBagConstraints.HORIZONTAL;
         c.anchor = GridBagConstraints.NORTH;
         c.weightx = 0.5;
@@ -44,20 +48,44 @@ public class InfiniteProgressGlassPane {
     }
 
     public void start() {
-        glassPane.setVisible(true);
-        progress.start();
+        if (!progress.isRunning()) {
+            glassPane.setVisible(true);
+            progress.start();
+        }
     }
 
     public void stop() {
-        progress.stop();
-        glassPane.setVisible(false);
+        if (progress.isRunning()) {
+            progress.stop();
+            glassPane.setVisible(false);
+        }
+    }
+
+    public void setPourcentage(final int pourcentage) {
+        setText(progressLabel.getText(), pourcentage);
+    }
+
+    public void setText(final String text, final int pourcentage) {
+        if (text == null) {
+            progressLabel.setText(pourcentage + "%");
+        } else {
+            progressLabel.setText(text + " " + pourcentage + "%");
+        }
     }
 
     public void setText(final String text) {
-        progressLabel.setText(text);
+        if (text == null) {
+            progressLabel.setText("");
+        } else {
+            progressLabel.setText(text);
+        }
     }
 
     public void setInfo(final String text) {
-        infoLabel.setText(text);
+        if (text == null) {
+            infoLabel.setText("");
+        } else {
+            infoLabel.setText(text);
+        }
     }
 }
