@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.TransferHandler;
 
 /**
@@ -59,6 +60,15 @@ public abstract class FileTransferHandler extends TransferHandler {
             }
         }
         return true;
+    }
+
+    /**
+     * Install a given {@link FileTransferHandler} to a given {@link JFrame}.
+     * @param fileTransfertHandler The {@link FileTransferHandler} to install to frame
+     * @param frame The frame on which to install {@link FileTransferHandler}
+     */
+    public static void install(final FileTransferHandler fileTransfertHandler, final JFrame frame) {
+        frame.setTransferHandler(fileTransfertHandler);
     }
 
     /**
