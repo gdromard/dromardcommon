@@ -164,13 +164,13 @@ public final class ReflectHelper {
             }
             return getter.invoke(object, arguments);
         } catch (NoSuchMethodException ex) {
-            NoSuchMethodException thrown = new NoSuchMethodException(ReflectHelper.formatInvokeGetterException(ex, object, methodName, arguments));
+            NoSuchMethodException thrown = new NoSuchMethodException(ReflectHelper.formatInvokeException(ex, object, methodName, arguments));
             thrown.setStackTrace(ex.getStackTrace());
             throw thrown;
         } catch (InvocationTargetException ex) {
-            throw new InvocationTargetException(ex.getTargetException(), ReflectHelper.formatInvokeGetterException(ex.getTargetException(), object, methodName, arguments));
+            throw new InvocationTargetException(ex.getTargetException(), ReflectHelper.formatInvokeException(ex.getTargetException(), object, methodName, arguments));
         } catch (IllegalAccessException ex) {
-            IllegalAccessException thrown = new IllegalAccessException(ReflectHelper.formatInvokeGetterException(ex, object, methodName, arguments));
+            IllegalAccessException thrown = new IllegalAccessException(ReflectHelper.formatInvokeException(ex, object, methodName, arguments));
             thrown.setStackTrace(ex.getStackTrace());
             throw thrown;
         }
@@ -241,7 +241,45 @@ public final class ReflectHelper {
      * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static void invokeSetter(final Object toFill, final String fieldName, final Object valueToSet, final Class valueToSetType) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        ReflectHelper.invokeMethod(toFill, ReflectHelper.computeAccessorMethodName(ReflectHelper.SETTER, fieldName), new Object[]{valueToSet}, new Class[]{valueToSetType});
+        //ReflectHelper.invokeMethod(toFill, ReflectHelper.computeAccessorMethodName(ReflectHelper.SETTER, fieldName), new Object[]{valueToSet}, new Class[]{valueToSetType});
+        List<Method> objectSetters = ReflectHelper.getSettersRecursivly(toFill.getClass());
+        String setterName = ReflectHelper.computeAccessorMethodName(ReflectHelper.SETTER, fieldName);
+        for (Method setter : objectSetters) {
+            if (setter.getName().equals(setterName) && setter.getParameterTypes().length == 1 && autoBoxingValidation(setter.getParameterTypes()[0], valueToSetType)) {
+                ReflectHelper.invokeMethod(toFill, setterName, new Object[]{valueToSet}, setter.getParameterTypes());
+                return;
+            }
+        }
+        // Test if setter exists with parent class type
+        for (Method setter : objectSetters) {
+            if (setter.getName().equals(setterName) && setter.getParameterTypes().length == 1 && autoBoxingValidation(setter.getParameterTypes()[0], valueToSetType.getSuperclass())) {
+                ReflectHelper.invokeMethod(toFill, setterName, new Object[]{valueToSet}, setter.getParameterTypes());
+                return;
+            }
+        }
+        throw new NoSuchMethodException(ReflectHelper.formatInvokeException(null, toFill, setterName, new Object[]{valueToSet}));
+    }
+
+    private static boolean autoBoxingValidation(final Class valid, final Class check) {
+        if (valid.equals(check)) {
+            return true;
+        }
+        if (check.equals(Boolean.class)) {
+            return valid.equals(boolean.class);
+        } else if (check.equals(Integer.class)) {
+            return valid.equals(int.class);
+        } else if (check.equals(Long.class)) {
+            return valid.equals(long.class);
+        } else if (check.equals(Double.class)) {
+            return valid.equals(double.class);
+        } else if (check.equals(Float.class)) {
+            return valid.equals(float.class);
+        } else if (check.equals(Character.class)) {
+            return valid.equals(char.class);
+        } else if (check.equals(Byte.class)) {
+            return valid.equals(byte.class);
+        }
+        return false;
     }
 
     /**
@@ -255,25 +293,17 @@ public final class ReflectHelper {
      * @throws IllegalAccessException Thrown when an illegal access of the instance is done
      */
     public static Object invokeGetter(final Object bean, final String fieldName) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        // Retrieve
-        Class beanClass = bean.getClass();
-        Map getters = ReflectHelper.getCachedGetters(beanClass);
-        Method getter = (Method) getters.get(fieldName);
-        if (getter == null) {
-            try {
-                getter = ReflectHelper.getMethod(beanClass, ReflectHelper.computeAccessorMethodName(ReflectHelper.GETTER, fieldName), new Class[]{});
-            } catch (NoSuchMethodException ex) {
-                try {
-                    getter = ReflectHelper.getMethod(beanClass, ReflectHelper.computeAccessorMethodName(ReflectHelper.BOOLEAN_GETTER, fieldName), new Class[]{});
-                } catch (NoSuchMethodException exOnBoolean) {
-                    // if throws NoSuchmethodException again, let the original one bubble up.
-                    throw ex;
-                }
+        List<Method> objectGetters = ReflectHelper.getGettersRecursivly(bean.getClass());
+        String getterName = ReflectHelper.computeAccessorMethodName(ReflectHelper.GETTER, fieldName);
+        String booleanGetterName = ReflectHelper.computeAccessorMethodName(ReflectHelper.BOOLEAN_GETTER, fieldName);
+        for (Method getter : objectGetters) {
+            if (getter.getName().equals(getterName) && getter.getParameterTypes().length == 0) {
+                return ReflectHelper.invokeMethod(bean, getterName, new Object[]{});
+            } else if (getter.getName().equals(booleanGetterName) && getter.getParameterTypes().length == 0) {
+                return ReflectHelper.invokeMethod(bean, booleanGetterName, new Object[]{});
             }
-            getters.put(fieldName, getter);
         }
-        // Invoke
-        return ReflectHelper.invokeMethod(bean, getter, new Object[]{});
+        throw new NoSuchMethodException(ReflectHelper.formatInvokeException(null, bean, fieldName, new Class[]{}));
     }
 
     /**
@@ -374,18 +404,18 @@ public final class ReflectHelper {
      * @param arguments The method arguments
      * @return The detailed message
      */
-    private static String formatInvokeGetterException(final Throwable ex, final Object object, final String method, final Object[] arguments) {
-        String message = ex.getMessage();
-        if (message == null) {
+    private static String formatInvokeException(final Throwable ex, final Object object, final String method, final Object[] arguments) {
+        String message;
+        if (ex == null || ex.getMessage() == null) {
             message = "";
         } else {
-            message += " - ";
+            message = ex.getMessage() + " - ";
         }
         String args = "";
         for (int i = 0; i < arguments.length; ++i) {
             args += arguments[i].getClass().getName();
             // Concat each element
-            args += arguments[i];
+            args += "='" + arguments[i] + "'";
             // Add separator if necessary
             if ((i < arguments.length - 1)) {
                 args += ", ";
