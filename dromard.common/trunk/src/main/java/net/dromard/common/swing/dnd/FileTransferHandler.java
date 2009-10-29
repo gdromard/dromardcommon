@@ -60,4 +60,13 @@ public abstract class FileTransferHandler extends TransferHandler {
         }
         return true;
     }
+
+    /**
+     * Install a given {@link FileTransferHandler} to a given {@link JComponent}.
+     * @param fileTransfertHandler The {@link FileTransferHandler} to install to component
+     * @param component The component on which to install {@link FileTransferHandler}
+     */
+    public static void install(final FileTransferHandler fileTransfertHandler, final JComponent component) {
+        component.setTransferHandler(fileTransfertHandler);
+    }
 }
